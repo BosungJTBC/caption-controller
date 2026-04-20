@@ -121,9 +121,12 @@ async function init() {
   loadUsers();
 }
 
+let noticeId = null;
+
 async function loadNotice() {
   const { data } = await SB.from('notices').select('*').order('id').limit(1).single();
   if (!data) return;
+  noticeId = data.id;
   document.getElementById('noticeContent').value = data.content || '';
   document.getElementById('noticeActive').checked = !!data.is_active;
   updateActiveLabel(!!data.is_active);
@@ -134,7 +137,7 @@ async function saveNotice() {
   const content = document.getElementById('noticeContent').value.trim();
   const is_active = document.getElementById('noticeActive').checked;
   const msg = document.getElementById('noticeMsg');
-  const { error } = await SB.from('notices').update({ content, is_active, updated_at: new Date().toISOString() }).eq('id', 1);
+  const { error } = await SB.from('notices').update({ content, is_active, updated_at: new Date().toISOString() }).eq('id', noticeId);
   if (error) { msg.className = 'status-msg err'; msg.textContent = '저장 실패'; return; }
   msg.className = 'status-msg ok'; msg.textContent = '저장됐습니다.';
   setTimeout(() => msg.textContent = '', 2000);
@@ -146,7 +149,7 @@ async function clearNotice() {
   if (!confirm('공지를 삭제하고 비활성화할까요?')) return;
   document.getElementById('noticeContent').value = '';
   document.getElementById('noticeActive').checked = false;
-  await SB.from('notices').update({ content: '', is_active: false, updated_at: new Date().toISOString() }).eq('id', 1);
+  await SB.from('notices').update({ content: '', is_active: false, updated_at: new Date().toISOString() }).eq('id', noticeId);
   updateActiveLabel(false);
   updatePreview('');
   document.getElementById('noticeMsg').className = 'status-msg ok';
