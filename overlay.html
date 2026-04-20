@@ -90,9 +90,18 @@ function applyState(data) {
   if(newText!==lastText||newStyleId!==lastStyleId){
     if(newText&&cap){
       const preset=(data.presets||[]).find(p=>p.id===cap.styleId)||(data.presets||[])[0];
-      if(preset)applyPreset(preset,bar,labelEl,textEl);
-      if(lastText&&data.anim!==false){bar.classList.remove('visible');setTimeout(()=>{textEl.textContent=newText;bar.classList.add('visible');},350);}
-      else{textEl.textContent=newText;bar.classList.add('visible');}
+      if(lastText&&data.anim!==false){
+        bar.classList.remove('visible');
+        setTimeout(()=>{
+          if(preset)applyPreset(preset,bar,labelEl,textEl);
+          textEl.textContent=newText;
+          bar.classList.add('visible');
+        },420);
+      } else {
+        if(preset)applyPreset(preset,bar,labelEl,textEl);
+        textEl.textContent=newText;
+        bar.classList.add('visible');
+      }
     } else bar.classList.remove('visible');
     lastText=newText;lastStyleId=newStyleId;
   }
