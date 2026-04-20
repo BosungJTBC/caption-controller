@@ -2,34 +2,138 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>자막 시스템</title>
+<title>JTBC 디지털 라이브 자막</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Apple SD Gothic Neo', sans-serif; background: #0f0f13; color: #e8e8e8; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-.card { background: #1a1a22; border: 0.5px solid #2a2a38; border-radius: 16px; padding: 40px; text-align: center; max-width: 360px; width: 100%; }
-h1 { font-size: 20px; font-weight: 500; color: #fff; margin-bottom: 8px; }
-p { font-size: 13px; color: #666; margin-bottom: 32px; line-height: 1.6; }
-.btn { display: block; width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; margin-bottom: 10px; transition: all 0.15s; text-decoration: none; text-align: center; }
-.btn-primary { background: #5566ff; color: #fff; }
-.btn-primary:hover { background: #6677ff; }
+body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #0a0a0f; color: #e8e8e8; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.wrap { width: 100%; max-width: 420px; padding: 24px; }
+.logo { text-align: center; margin-bottom: 36px; }
+.logo .brand { font-size: 13px; font-weight: 700; color: #e8001e; letter-spacing: 0.15em; margin-bottom: 8px; }
+.logo h1 { font-size: 22px; font-weight: 500; color: #fff; letter-spacing: -0.02em; }
+.logo p { font-size: 12px; color: #555; margin-top: 6px; }
+.card { background: #1a1a22; border: 0.5px solid #2a2a38; border-radius: 16px; padding: 32px; }
+.tabs { display: flex; gap: 0; margin-bottom: 28px; background: #12121a; border-radius: 8px; padding: 3px; }
+.tab { flex: 1; padding: 8px; text-align: center; font-size: 13px; color: #666; cursor: pointer; border-radius: 6px; transition: all 0.15s; border: none; background: none; font-family: inherit; }
+.tab.active { background: #2a2a3a; color: #fff; }
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 11px; color: #777; margin-bottom: 6px; display: block; }
+.form-input { width: 100%; background: #12121a; border: 0.5px solid #2a2a38; border-radius: 8px; color: #e8e8e8; padding: 11px 14px; font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+.form-input:focus { border-color: #5566ff; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn { width: 100%; padding: 13px; border-radius: 10px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; margin-top: 6px; }
+.btn-primary { background: #e8001e; color: #fff; }
+.btn-primary:hover { background: #ff1a35; }
 .btn-secondary { background: #2a2a38; color: #aaa; border: 0.5px solid #3a3a4a; }
 .btn-secondary:hover { background: #33334a; color: #ddd; }
-.obs-url { background: #0a0a0e; border-radius: 8px; padding: 10px 14px; font-size: 11px; color: #88aaff; word-break: break-all; margin-top: 16px; text-align: left; line-height: 1.6; }
-.label { font-size: 11px; color: #555; margin-bottom: 6px; text-align: left; }
+.error-msg { font-size: 12px; color: #ff8888; margin-top: 10px; text-align: center; min-height: 18px; }
+.success-msg { font-size: 12px; color: #88ff99; margin-top: 10px; text-align: center; min-height: 18px; }
+.divider { height: 0.5px; background: #2a2a38; margin: 20px 0; }
 </style>
 </head>
 <body>
-<div class="card">
-  <h1>🎬 자막 시스템</h1>
-  <p>실시간 방송 자막 컨트롤 시스템</p>
-  <a href="controller.html" class="btn btn-primary">컨트롤러 열기</a>
-  <a href="overlay.html" class="btn btn-secondary">오버레이 미리보기</a>
-  <div class="label">OBS Browser Source URL</div>
-  <div class="obs-url" id="obsUrl"></div>
+<div class="wrap">
+  <div class="logo">
+    <div class="brand">JTBC</div>
+    <h1>디지털 라이브 자막</h1>
+    <p>Digital Live Caption System</p>
+  </div>
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('login')">로그인</button>
+      <button class="tab" onclick="showTab('signup')">회원가입</button>
+    </div>
+
+    <!-- 로그인 -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label class="form-label">이메일</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="이메일 입력">
+      </div>
+      <div class="form-group">
+        <label class="form-label">비밀번호</label>
+        <input type="password" class="form-input" id="loginPassword" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="error-msg" id="loginError"></div>
+      <button class="btn btn-primary" onclick="doLogin()">로그인</button>
+    </div>
+
+    <!-- 회원가입 -->
+    <div id="signupForm" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">이메일</label>
+        <input type="email" class="form-input" id="signupEmail" placeholder="이메일 입력">
+      </div>
+      <div class="form-group">
+        <label class="form-label">비밀번호</label>
+        <input type="password" class="form-input" id="signupPassword" placeholder="8자 이상">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">이름</label>
+          <input type="text" class="form-input" id="signupName" placeholder="홍길동">
+        </div>
+        <div class="form-group">
+          <label class="form-label">부서</label>
+          <input type="text" class="form-input" id="signupDept" placeholder="디지털뉴스팀">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">전화번호</label>
+        <input type="tel" class="form-input" id="signupPhone" placeholder="010-0000-0000" onkeydown="if(event.key==='Enter')doSignup()">
+      </div>
+      <div class="error-msg" id="signupError"></div>
+      <div class="success-msg" id="signupSuccess"></div>
+      <button class="btn btn-primary" onclick="doSignup()">가입하기</button>
+    </div>
+  </div>
 </div>
+
 <script>
-  const base = location.origin + location.pathname.replace('index.html','');
-  document.getElementById('obsUrl').textContent = base + 'overlay.html';
+const SUPABASE_URL = 'https://mtkppcexpubazjeceyvj.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10a3BwY2V4cHViYXpqZWNleXZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NjA5NDIsImV4cCI6MjA5MjIzNjk0Mn0.3ruVRo3JIWUipK5-as9kTzYjRZa32K_TX1X_vSqi_v4';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+sb.auth.getSession().then(({ data }) => {
+  if (data.session) location.href = 'controller.html';
+});
+
+function showTab(tab) {
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='signup')));
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  if (!email || !password) { errEl.textContent = '이메일과 비밀번호를 입력해주세요.'; return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { errEl.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.'; return; }
+  location.href = 'controller.html';
+}
+
+async function doSignup() {
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const name = document.getElementById('signupName').value.trim();
+  const department = document.getElementById('signupDept').value.trim();
+  const phone = document.getElementById('signupPhone').value.trim();
+  const errEl = document.getElementById('signupError');
+  const sucEl = document.getElementById('signupSuccess');
+  errEl.textContent = ''; sucEl.textContent = '';
+  if (!email || !password || !name || !department) { errEl.textContent = '모든 항목을 입력해주세요.'; return; }
+  if (password.length < 8) { errEl.textContent = '비밀번호는 8자 이상이어야 합니다.'; return; }
+  const { data, error } = await sb.auth.signUp({ email, password, options: { data: { name, department, phone } } });
+  if (error) { errEl.textContent = error.message; return; }
+  if (data.user) {
+    await sb.from('profiles').upsert({ id: data.user.id, name, department, phone });
+  }
+  sucEl.textContent = '가입이 완료됐습니다! 로그인해주세요.';
+  setTimeout(() => showTab('login'), 2000);
+}
 </script>
 </body>
 </html>
