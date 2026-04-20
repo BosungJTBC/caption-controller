@@ -39,7 +39,6 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
     <h1>디지털 라이브 자막</h1>
     <p>Digital Live Caption System</p>
   </div>
-  <div id="noticeArea"></div>
   <div class="card">
     <div class="tabs">
       <button class="tab active" id="tabLogin" onclick="showTab('login')">로그인</button>
@@ -85,6 +84,7 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
       <button class="btn btn-red" onclick="signup()">가입하기</button>
     </div>
   </div>
+  <div id="noticeArea" style="margin-top:16px"></div>
 </div>
 <script>
 const SB = supabase.createClient(
