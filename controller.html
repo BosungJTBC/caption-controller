@@ -169,7 +169,11 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
     <div class="section">
       <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
         <span>스타일 프리셋</span>
-        <button class="btn btn-secondary btn-sm" onclick="openPresetModal(null)">+ 새 스타일</button>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-secondary btn-sm" onclick="importPresets()">불러오기</button>
+          <button class="btn btn-secondary btn-sm" onclick="exportPresets()">내보내기</button>
+          <button class="btn btn-secondary btn-sm" onclick="openPresetModal(null)">+ 새 스타일</button>
+        </div>
       </div>
       <div class="preset-list" id="presetList"></div>
     </div>
@@ -349,6 +353,7 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
 </div>
 
 <input type="file" id="fileInput" accept=".json,.txt" style="display:none" onchange="handleImport(event)">
+<input type="file" id="presetFileInput" accept=".json" style="display:none" onchange="handleImportPresets(event)">
 
 <script>
 const SUPABASE_URL = 'https://mtkppcexpubazjeceyvj.supabase.co';
@@ -528,7 +533,10 @@ function renderPresets() {
         <div class="preset-name">${escHtml(p.name)}</div>
         <div class="preset-desc">${p.width}×${p.height}px · ${p.fontSize}px · ${p.textAlign==='center'?'가운데':p.textAlign==='right'?'오른쪽':'왼쪽'}</div>
       </div>
-      <div class="preset-actions"><button class="ic-btn" onclick="openPresetModal('${p.id}')">✎</button></div>
+      <div class="preset-actions">
+        <button class="ic-btn" onclick="duplicatePreset('${p.id}')" title="복제">⧉</button>
+        <button class="ic-btn" onclick="openPresetModal('${p.id}')" title="편집">✎</button>
+      </div>
     </div>`).join('');
 }
 
@@ -588,7 +596,44 @@ function syncPosNum(){
   pushState();
 }
 
-function exportFile(){
+function duplicatePreset(id) {
+  const original = getPresetById(id);
+  if (!original) return;
+  const copy = JSON.parse(JSON.stringify(original));
+  copy.id = 'p_' + Date.now();
+  copy.name = original.name + ' 사본';
+  state.presets.push(copy);
+  renderAll(); pushState();
+}
+
+function exportPresets() {
+  const blob = new Blob([JSON.stringify({ presets: state.presets }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'presets_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
+}
+
+function importPresets() { document.getElementById('presetFileInput').click(); }
+
+function handleImportPresets(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.presets || !Array.isArray(data.presets)) { alert('올바른 스타일 파일이 아닙니다.'); return; }
+      const existingIds = new Set(state.presets.map(p => p.id));
+      let added = 0;
+      data.presets.forEach(p => {
+        if (existingIds.has(p.id)) p.id = 'p_' + Date.now() + '_' + added;
+        state.presets.push(p);
+        added++;
+      });
+      renderAll(); pushState();
+      alert(`${added}개 스타일을 불러왔습니다.`);
+    } catch(err) { alert('파일 형식 오류'); }
+  };
+  reader.readAsText(file); e.target.value = '';
+}
   const blob=new Blob([JSON.stringify({captions:state.captions,presets:state.presets},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='captions_'+new Date().toISOString().slice(0,10)+'.json';a.click();
@@ -726,6 +771,48 @@ function deleteEditingPreset(){
   state.presets=state.presets.filter(p=>p.id!==editingPresetId);
   state.captions.forEach(c=>{if(c.styleId===editingPresetId)c.styleId=state.presets[0]?.id||'';});
   closeModal();renderAll();pushState();
+}
+
+
+function duplicatePreset(id) {
+  const src = getPresetById(id);
+  if (!src) return;
+  const copy = JSON.parse(JSON.stringify(src));
+  copy.id = 'p_' + Date.now();
+  copy.name = src.name + ' 사본';
+  state.presets.push(copy);
+  renderAll(); pushState();
+}
+
+function exportPresets() {
+  const blob = new Blob([JSON.stringify({ presets: state.presets }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'presets_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+function importPresets() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!data.presets || !Array.isArray(data.presets)) { alert('올바른 프리셋 파일이 아닙니다.'); return; }
+        const newPresets = data.presets.map(p => ({ ...p, id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2) }));
+        state.presets = [...state.presets, ...newPresets];
+        renderAll(); pushState();
+        alert(`${newPresets.length}개 스타일을 불러왔습니다.`);
+      } catch(err) { alert('파일 형식 오류'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
 
 document.getElementById('newCaption').addEventListener('keydown',e=>{
