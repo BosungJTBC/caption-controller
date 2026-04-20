@@ -7,191 +7,212 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #0f0f13; color: #e8e8e8; min-height: 100vh; display: flex; flex-direction: column; }
-.topbar { background: #1a1a22; border-bottom: 0.5px solid #2a2a38; padding: 0 24px; display: flex; align-items: center; gap: 12px; height: 52px; flex-shrink: 0; }
-.topbar .brand { font-size: 11px; font-weight: 700; color: #e8001e; letter-spacing: 0.12em; }
+
+/* 상단바 */
+.topbar { height: 52px; background: #1a1a22; border-bottom: 0.5px solid #2a2a38; padding: 0 24px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.brand { font-size: 11px; font-weight: 700; color: #e8001e; letter-spacing: 0.12em; }
 .topbar h1 { font-size: 14px; font-weight: 500; color: #fff; display: flex; align-items: center; gap: 8px; }
-.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #ff4444; animation: blink 1.2s ease-in-out infinite; flex-shrink: 0; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #ff4444; animation: blink 1.2s ease-in-out infinite; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 .status-pill { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: #2a2a38; color: #888; display: flex; align-items: center; gap: 6px; }
-.status-pill .dot { width: 5px; height: 5px; border-radius: 50%; background: #555; transition: background 0.3s; }
-.status-pill .dot.live { background: #44ff88; }
-.user-info { font-size: 12px; color: #888; display: flex; align-items: center; gap: 8px; }
-.user-name { color: #ccc; font-weight: 500; }
-.btn { border: none; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; padding: 7px 12px; transition: all 0.15s; font-family: inherit; white-space: nowrap; }
-.btn-primary { background: #e8001e; color: #fff; }
-.btn-primary:hover { background: #ff1a35; }
-.btn-secondary { background: #2a2a38; color: #aaa; border: 0.5px solid #3a3a4a; }
-.btn-secondary:hover { background: #33334a; color: #ddd; }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; background: #555; transition: background 0.3s; }
+.status-dot.live { background: #44ff88; }
+.user-name { font-size: 12px; color: #ccc; font-weight: 500; }
+.ghost-btn { background: none; border: none; color: #666; font-size: 11px; cursor: pointer; font-family: inherit; padding: 4px 8px; border-radius: 6px; transition: all 0.15s; }
+.ghost-btn:hover { color: #aaa; background: #2a2a38; }
+
+/* 메인 레이아웃 */
+.main { display: grid; grid-template-columns: 1fr 380px; flex: 1; min-height: 0; }
+.left { display: flex; flex-direction: column; border-right: 0.5px solid #2a2a38; min-height: 0; }
+.right { display: flex; flex-direction: column; overflow-y: auto; }
+.panel { padding: 16px 20px; border-bottom: 0.5px solid #2a2a38; flex-shrink: 0; }
+.panel-title { font-size: 11px; font-weight: 500; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+
+/* 버튼 */
+.btn { border: none; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; padding: 8px 14px; transition: all 0.15s; font-family: inherit; white-space: nowrap; }
+.btn-red { background: #e8001e; color: #fff; }
+.btn-red:hover { background: #ff1a35; }
+.btn-gray { background: #2a2a38; color: #aaa; border: 0.5px solid #3a3a4a; }
+.btn-gray:hover { background: #33334a; color: #ddd; }
 .btn-danger { background: #ff444418; color: #ff8888; border: 0.5px solid #ff444430; }
 .btn-danger:hover { background: #ff444430; }
 .btn-sm { padding: 5px 10px; font-size: 11px; }
-.btn-ghost { background: none; border: none; color: #666; font-size: 11px; cursor: pointer; font-family: inherit; padding: 4px 8px; border-radius: 6px; }
-.btn-ghost:hover { color: #aaa; background: #2a2a38; }
-
-.main { display: grid; grid-template-columns: 1fr 380px; flex: 1; overflow: hidden; }
-.left { display: flex; flex-direction: column; border-right: 0.5px solid #2a2a38; overflow: hidden; }
-.section { padding: 16px 20px; border-bottom: 0.5px solid #2a2a38; flex-shrink: 0; }
-.section-title { font-size: 11px; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
-.caption-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
-.caption-item { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; background: #12121a; border: 0.5px solid #2a2a38; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
-.caption-item:hover { border-color: #3a3a5a; background: #1a1a28; }
-.caption-item.active { border-color: #e8001e; background: #1f1015; }
-.c-num { font-size: 11px; color: #555; min-width: 18px; padding-top: 2px; }
-.c-body { flex: 1; min-width: 0; }
-.c-text { font-size: 13px; color: #ccc; line-height: 1.5; word-break: break-all; }
-.caption-item.active .c-text { color: #fff; }
-.c-style-tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; margin-top: 5px; font-weight: 500; }
-.c-actions { display: flex; gap: 4px; flex-shrink: 0; }
-.onair-badge { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: #e8001e22; color: #ff8899; border: 0.5px solid #e8001e44; white-space: nowrap; align-self: flex-start; }
-.ic-btn { background: none; border: none; color: #555; cursor: pointer; font-size: 13px; padding: 3px 5px; border-radius: 4px; transition: all 0.15s; line-height: 1; }
+.ic-btn { background: none; border: none; color: #555; cursor: pointer; font-size: 13px; padding: 3px 6px; border-radius: 4px; transition: all 0.15s; line-height: 1; font-family: inherit; }
 .ic-btn:hover { color: #aaa; background: #2a2a38; }
-.ic-btn.del:hover { color: #ff6666; background: #ff000015; }
-.ic-btn.edit-save { color: #5566ff; }
-.caption-item.editing { border-color: #5566ff88; }
-.edit-textarea { width: 100%; background: #1a1a35; border: 0.5px solid #5566ff; border-radius: 6px; color: #fff; padding: 6px 8px; font-size: 13px; font-family: inherit; resize: none; min-height: 50px; outline: none; line-height: 1.5; }
-.edit-style-select { margin-top: 6px; width: 100%; background: #12121a; border: 0.5px solid #3a3a5a; border-radius: 6px; color: #ccc; padding: 5px 8px; font-size: 12px; font-family: inherit; outline: none; }
-.add-area { padding: 14px 16px; background: #12121a; border-top: 0.5px solid #2a2a38; flex-shrink: 0; }
-.add-row { display: flex; gap: 8px; margin-bottom: 8px; }
-.add-textarea { flex: 1; background: #1a1a22; border: 0.5px solid #2a2a38; border-radius: 8px; color: #e8e8e8; padding: 9px 12px; font-size: 13px; font-family: inherit; resize: none; min-height: 54px; outline: none; transition: border-color 0.15s; line-height: 1.5; }
-.add-textarea:focus { border-color: #e8001e; }
-.add-style-row { display: flex; gap: 8px; align-items: center; }
-.style-select { flex: 1; background: #1a1a22; border: 0.5px solid #2a2a38; border-radius: 8px; color: #ccc; padding: 8px 10px; font-size: 12px; font-family: inherit; outline: none; }
+.ic-btn.danger:hover { color: #ff6666; background: #ff000015; }
+.ic-btn.confirm { color: #5566ff; }
+.row { display: flex; gap: 6px; align-items: center; }
+.row-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
 
-.right { display: flex; flex-direction: column; overflow-y: auto; }
-.onair-box { background: #0a0a12; border: 0.5px solid #2a2a38; border-radius: 8px; padding: 12px; min-height: 52px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.onair-style-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+/* 자막 목록 */
+.caption-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 5px; min-height: 0; }
+.cap-item { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; background: #12121a; border: 0.5px solid #2a2a38; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+.cap-item:hover { border-color: #3a3a5a; background: #1a1a28; }
+.cap-item.active { border-color: #e8001e; background: #1f0f12; }
+.cap-item.editing { border-color: #5566ff88; cursor: default; }
+.cap-num { font-size: 11px; color: #555; min-width: 18px; padding-top: 2px; flex-shrink: 0; }
+.cap-body { flex: 1; min-width: 0; }
+.cap-text { font-size: 13px; color: #ccc; line-height: 1.5; word-break: break-all; }
+.cap-item.active .cap-text { color: #fff; }
+.cap-tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; margin-top: 5px; font-weight: 500; }
+.cap-actions { display: flex; gap: 2px; flex-shrink: 0; align-items: flex-start; }
+.onair-badge { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: #e8001e22; color: #ff8899; border: 0.5px solid #e8001e44; white-space: nowrap; }
+.edit-ta { width: 100%; background: #1a1a35; border: 0.5px solid #5566ff; border-radius: 6px; color: #fff; padding: 6px 8px; font-size: 13px; font-family: inherit; resize: none; min-height: 48px; outline: none; line-height: 1.5; }
+.edit-sel { margin-top: 6px; width: 100%; background: #12121a; border: 0.5px solid #3a3a5a; border-radius: 6px; color: #ccc; padding: 5px 8px; font-size: 12px; font-family: inherit; outline: none; }
+
+/* 자막 추가 영역 */
+.add-area { padding: 12px 14px; background: #12121a; border-top: 0.5px solid #2a2a38; flex-shrink: 0; }
+.add-ta { width: 100%; background: #1a1a22; border: 0.5px solid #2a2a38; border-radius: 8px; color: #e8e8e8; padding: 9px 12px; font-size: 13px; font-family: inherit; resize: none; min-height: 52px; outline: none; transition: border-color 0.15s; line-height: 1.5; }
+.add-ta:focus { border-color: #e8001e; }
+.add-bottom { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+.style-sel { flex: 1; background: #1a1a22; border: 0.5px solid #2a2a38; border-radius: 8px; color: #ccc; padding: 7px 10px; font-size: 12px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+.style-sel:focus { border-color: #e8001e; }
+
+/* 송출 박스 */
+.onair-box { background: #0a0a12; border: 0.5px solid #2a2a38; border-radius: 8px; padding: 12px; min-height: 50px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.onair-dot { width: 8px; height: 8px; border-radius: 50%; background: #333; flex-shrink: 0; }
 .onair-text { font-size: 14px; color: #fff; line-height: 1.5; flex: 1; }
 .onair-empty { font-size: 13px; color: #444; font-style: italic; }
-.nav-row { display: flex; gap: 6px; margin-bottom: 8px; }
-.nav-row .btn { flex: 1; }
-.preset-list { display: flex; flex-direction: column; gap: 6px; }
-.preset-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #12121a; border: 0.5px solid #2a2a38; border-radius: 8px; }
-.preset-preview { width: 64px; height: 24px; border-radius: 3px; flex-shrink: 0; display: flex; align-items: stretch; overflow: hidden; }
-.preset-info { flex: 1; }
+
+/* 프리셋 */
+.preset-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #12121a; border: 0.5px solid #2a2a38; border-radius: 8px; margin-bottom: 6px; }
+.preset-thumb { width: 64px; height: 26px; border-radius: 3px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; }
+.preset-info { flex: 1; min-width: 0; }
 .preset-name { font-size: 13px; color: #ddd; }
-.preset-desc { font-size: 11px; color: #666; margin-top: 2px; }
-.form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
-.form-label { font-size: 11px; color: #777; }
-.form-row { display: flex; gap: 8px; align-items: center; }
-.form-input { flex: 1; background: #12121a; border: 0.5px solid #2a2a38; border-radius: 6px; color: #e8e8e8; padding: 7px 10px; font-size: 12px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+.preset-desc { font-size: 11px; color: #555; margin-top: 2px; }
+
+/* 폼 요소 */
+.form-group { margin-bottom: 12px; }
+.form-label { font-size: 11px; color: #777; margin-bottom: 5px; display: block; }
+.form-input { background: #12121a; border: 0.5px solid #2a2a38; border-radius: 6px; color: #e8e8e8; padding: 7px 10px; font-size: 12px; font-family: inherit; outline: none; transition: border-color 0.15s; width: 100%; }
 .form-input:focus { border-color: #5566ff; }
-input[type=color].form-input { padding: 3px 6px; height: 32px; cursor: pointer; }
+input[type=color].form-input { padding: 3px 5px; height: 32px; cursor: pointer; width: 56px; flex: none; }
 input[type=range] { flex: 1; accent-color: #e8001e; }
-.range-val { font-size: 11px; color: #888; min-width: 44px; text-align: right; }
+.form-row { display: flex; gap: 8px; align-items: center; }
+.range-val { font-size: 11px; color: #888; min-width: 44px; text-align: right; flex-shrink: 0; }
+.color-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+.color-label { font-size: 11px; color: #777; min-width: 52px; flex-shrink: 0; }
 .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
 .toggle-label { font-size: 12px; color: #888; }
-.toggle { position: relative; width: 36px; height: 20px; }
+.toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
 .toggle input { opacity: 0; width: 0; height: 0; }
 .toggle-slider { position: absolute; inset: 0; background: #2a2a38; border-radius: 10px; cursor: pointer; transition: 0.2s; }
 .toggle-slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: #666; border-radius: 50%; transition: 0.2s; }
 .toggle input:checked + .toggle-slider { background: #e8001e44; }
 .toggle input:checked + .toggle-slider:before { transform: translateX(16px); background: #e8001e; }
-.sep { height: 0.5px; background: #2a2a38; margin: 8px 0; }
-.flex-gap { display: flex; gap: 6px; flex-wrap: wrap; }
-.color-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
-.color-label { font-size: 11px; color: #777; min-width: 56px; }
+.sep { height: 0.5px; background: #2a2a38; margin: 12px 0; }
+.section-label { font-size: 11px; color: #e8001e; font-weight: 500; margin-bottom: 10px; }
+.upload-area { display: flex; align-items: center; gap: 6px; background: #12121a; border: 0.5px dashed #3a3a5a; border-radius: 6px; color: #888; padding: 8px 12px; font-size: 12px; cursor: pointer; transition: all 0.15s; width: 100%; justify-content: center; }
+.upload-area:hover { border-color: #5566ff; color: #aaa; }
+.file-info { display: flex; align-items: center; gap: 8px; background: #12121a; border: 0.5px solid #2a2a38; border-radius: 6px; padding: 7px 10px; margin-top: 6px; }
+.file-info span { flex: 1; font-size: 11px; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12px; font-size: 11px; color: #88aaff; word-break: break-all; line-height: 1.6; }
+.empty-state { font-size: 13px; color: #444; padding: 20px; text-align: center; }
+
+/* 모달 */
 .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 100; }
-.modal { background: #1a1a22; border: 0.5px solid #3a3a4a; border-radius: 14px; padding: 24px; width: 500px; max-height: 85vh; overflow-y: auto; }
+.modal { background: #1a1a22; border: 0.5px solid #3a3a4a; border-radius: 14px; padding: 24px; width: 500px; max-height: 88vh; overflow-y: auto; }
 .modal-title { font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 20px; }
 .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
-.preview-bar { border-radius: 4px; overflow: hidden; display: flex; align-items: stretch; height: 48px; margin-bottom: 16px; }
-.preview-label-block { padding: 0 14px; display: flex; align-items: center; font-weight: 700; font-size: 13px; white-space: nowrap; }
-.preview-text-block { padding: 0 18px; display: flex; align-items: center; font-size: 16px; flex: 1; }
-.empty-state { font-size: 13px; color: #444; padding: 20px; text-align: center; }
-.upload-btn { display: flex; align-items: center; gap: 6px; background: #12121a; border: 0.5px dashed #3a3a5a; border-radius: 6px; color: #888; padding: 8px 12px; font-size: 12px; cursor: pointer; transition: all 0.15s; width: 100%; justify-content: center; }
-.upload-btn:hover { border-color: #5566ff; color: #aaa; }
-.uploaded-file { display: flex; align-items: center; gap: 8px; background: #12121a; border: 0.5px solid #2a2a38; border-radius: 6px; padding: 8px 10px; margin-top: 6px; }
-.uploaded-file span { flex: 1; font-size: 11px; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12px; font-size: 11px; color: #88aaff; word-break: break-all; }
+.preview-bar { border-radius: 4px; overflow: hidden; display: flex; align-items: stretch; height: 50px; margin-bottom: 16px; }
+.preview-text-block { padding: 0 18px; display: flex; align-items: center; font-size: 15px; flex: 1; }
 
 /* 계정 모달 */
-.profile-row { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 0.5px solid #2a2a38; }
+.profile-row { display: flex; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 0.5px solid #2a2a38; }
 .profile-row:last-child { border-bottom: none; }
-.profile-key { font-size: 12px; color: #666; min-width: 60px; }
+.profile-key { font-size: 12px; color: #555; min-width: 56px; }
 .profile-val { font-size: 13px; color: #ccc; }
-.success-msg { font-size: 12px; color: #88ff99; margin-top: 8px; }
-.error-msg { font-size: 12px; color: #ff8888; margin-top: 8px; }
+.msg-ok { font-size: 12px; color: #88ff99; margin-top: 8px; }
+.msg-err { font-size: 12px; color: #ff8888; margin-top: 8px; }
 </style>
 </head>
 <body>
 
+<!-- 상단바 -->
 <div class="topbar">
   <span class="brand">JTBC</span>
   <h1><span class="live-dot"></span> 디지털 라이브 자막</h1>
   <div class="topbar-right">
-    <div class="status-pill"><span class="dot" id="statusDot"></span><span id="statusText">연결 중...</span></div>
-    <div class="user-info">
-      <span class="user-name" id="userName">-</span>
-      <button class="btn-ghost" onclick="openAccountModal()">계정</button>
-      <button class="btn-ghost" onclick="doLogout()">로그아웃</button>
+    <div class="status-pill">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">연결 중...</span>
     </div>
+    <span class="user-name" id="userName"></span>
+    <button class="ghost-btn" onclick="openAccountModal()">계정</button>
+    <button class="ghost-btn" onclick="logout()">로그아웃</button>
   </div>
 </div>
 
+<!-- 메인 -->
 <div class="main">
+
+  <!-- 왼쪽: 자막 목록 -->
   <div class="left">
-    <div class="section" style="padding-bottom:12px;">
-      <div class="section-title">자막 목록</div>
-      <div class="flex-gap">
-        <button class="btn btn-secondary btn-sm" onclick="importFile()">불러오기</button>
-        <button class="btn btn-secondary btn-sm" onclick="exportFile()">저장</button>
-        <button class="btn btn-danger btn-sm" onclick="clearAll()" style="margin-left:auto;">전체삭제</button>
+    <div class="panel">
+      <div class="panel-title">자막 목록</div>
+      <div class="row-wrap">
+        <button class="btn btn-gray btn-sm" onclick="importCaptions()">불러오기</button>
+        <button class="btn btn-gray btn-sm" onclick="exportCaptions()">저장</button>
+        <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="clearAll()">전체삭제</button>
       </div>
     </div>
     <div class="caption-list" id="captionList"></div>
     <div class="add-area">
-      <div class="add-row">
-        <textarea class="add-textarea" id="newCaption" placeholder="새 자막 입력 (Enter 추가, Shift+Enter 줄바꿈)"></textarea>
-        <button class="btn btn-primary" onclick="addCaption()" style="align-self:flex-end;height:38px;">추가</button>
-      </div>
-      <div class="add-style-row">
-        <span style="font-size:11px;color:#666;white-space:nowrap;">스타일:</span>
-        <select class="style-select" id="addStyleSelect"></select>
+      <textarea class="add-ta" id="newCaption" placeholder="새 자막 입력 (Enter 추가 / Shift+Enter 줄바꿈)"></textarea>
+      <div class="add-bottom">
+        <span style="font-size:11px;color:#555;white-space:nowrap">스타일</span>
+        <select class="style-sel" id="addStyleSel"></select>
+        <button class="btn btn-red btn-sm" onclick="addCaption()">추가</button>
       </div>
     </div>
   </div>
 
+  <!-- 오른쪽 패널 -->
   <div class="right">
-    <div class="section">
-      <div class="section-title">현재 송출 중</div>
+
+    <!-- 송출 -->
+    <div class="panel">
+      <div class="panel-title">현재 송출 중</div>
       <div class="onair-box">
-        <div class="onair-style-dot" id="onairDot"></div>
+        <div class="onair-dot" id="onairDot"></div>
         <span id="onairText" class="onair-empty">자막을 선택하세요</span>
       </div>
-      <div class="nav-row">
-        <button class="btn btn-secondary" onclick="prevCaption()">◀ 이전</button>
-        <button class="btn btn-secondary" onclick="nextCaption()">다음 ▶</button>
+      <div class="row" style="margin-bottom:8px">
+        <button class="btn btn-gray" style="flex:1" onclick="prevCaption()">◀ 이전</button>
+        <button class="btn btn-gray" style="flex:1" onclick="nextCaption()">다음 ▶</button>
       </div>
-      <button class="btn btn-danger" style="width:100%;" onclick="clearCaption()">자막 숨기기</button>
+      <button class="btn btn-danger" style="width:100%" onclick="hideCaption()">자막 숨기기</button>
     </div>
 
-    <div class="section">
-      <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>스타일 프리셋</span>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-secondary btn-sm" onclick="importPresets()">불러오기</button>
-          <button class="btn btn-secondary btn-sm" onclick="exportPresets()">내보내기</button>
-          <button class="btn btn-secondary btn-sm" onclick="openPresetModal(null)">+ 새 스타일</button>
+    <!-- 스타일 프리셋 -->
+    <div class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <span class="panel-title" style="margin-bottom:0">스타일 프리셋</span>
+        <div class="row">
+          <button class="btn btn-gray btn-sm" onclick="importPresets()">불러오기</button>
+          <button class="btn btn-gray btn-sm" onclick="exportPresets()">내보내기</button>
+          <button class="btn btn-gray btn-sm" onclick="openPresetModal(null)">+ 새 스타일</button>
         </div>
       </div>
-      <div class="preset-list" id="presetList"></div>
+      <div id="presetList"></div>
     </div>
 
-    <div class="section">
-      <div class="section-title">오버레이 위치</div>
+    <!-- 오버레이 위치 -->
+    <div class="panel">
+      <div class="panel-title">오버레이 위치</div>
       <div class="form-group">
         <div class="form-label">X 오프셋 (px, 1920 기준)</div>
         <div class="form-row">
-          <input type="range" id="posX" min="-960" max="960" value="0" oninput="syncPos()">
-          <input type="number" class="form-input" id="posXNum" value="0" style="width:70px;flex:none;" oninput="syncPosNum()">
+          <input type="range" id="posX" min="-960" max="960" value="0" oninput="syncPos('range')">
+          <input type="number" class="form-input" id="posXNum" value="0" style="width:70px;flex:none" oninput="syncPos('num')">
         </div>
       </div>
       <div class="form-group">
         <div class="form-label">Y 오프셋 (px, 1080 기준)</div>
         <div class="form-row">
-          <input type="range" id="posY" min="-540" max="540" value="0" oninput="syncPos()">
-          <input type="number" class="form-input" id="posYNum" value="0" style="width:70px;flex:none;" oninput="syncPosNum()">
+          <input type="range" id="posY" min="-540" max="540" value="0" oninput="syncPos('range')">
+          <input type="number" class="form-input" id="posYNum" value="0" style="width:70px;flex:none" oninput="syncPos('num')">
         </div>
       </div>
       <div class="toggle-row">
@@ -200,61 +221,64 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-title">OBS 연결</div>
-      <p style="font-size:11px;color:#555;margin-bottom:8px;line-height:1.6;">OBS 브라우저 소스 URL</p>
+    <!-- OBS 연결 -->
+    <div class="panel">
+      <div class="panel-title">OBS 연결</div>
+      <p style="font-size:11px;color:#555;margin-bottom:8px;line-height:1.6">OBS 브라우저 소스 URL</p>
       <code id="obsUrl"></code>
-      <button class="btn btn-secondary btn-sm" style="width:100%;margin-top:8px;" id="copyUrlBtn" onclick="copyUrl()">URL 복사</button>
+      <button class="btn btn-gray btn-sm" style="width:100%;margin-top:8px" id="copyBtn" onclick="copyUrl()">URL 복사</button>
     </div>
+
   </div>
 </div>
 
-<!-- 프리셋 모달 -->
-<div class="modal-bg" id="modalBg" style="display:none;" onclick="closeModalBg(event)">
+<!-- 프리셋 편집 모달 -->
+<div class="modal-bg" id="presetModal" style="display:none" onclick="if(event.target===this)closePresetModal()">
   <div class="modal">
-    <div class="modal-title" id="modalTitle">새 스타일 만들기</div>
+    <div class="modal-title" id="presetModalTitle">새 스타일 만들기</div>
+
     <div class="preview-bar" id="previewBar">
-      <div class="preview-label-block" id="previewLabelEl">자막</div>
-      <div class="preview-text-block" id="previewTextEl">미리보기 텍스트</div>
+      <div class="preview-text-block" id="previewText">미리보기 텍스트</div>
     </div>
+
     <div class="form-group">
-      <div class="form-label">스타일 이름</div>
+      <label class="form-label">스타일 이름</label>
       <input type="text" class="form-input" id="pName" placeholder="예) 기본 자막" oninput="updatePreview()">
     </div>
+
     <div class="sep"></div>
-    <div style="font-size:11px;color:#e8001e;margin-bottom:10px;font-weight:500;">배경 이미지</div>
-    <div class="form-group">
-      <label class="upload-btn" for="bgImageInput">+ PNG 배경 이미지 업로드</label>
-      <input type="file" id="bgImageInput" accept="image/*" style="display:none" onchange="handleBgImage(event)">
-      <div id="bgImageInfo" style="display:none;" class="uploaded-file">
-        <span id="bgImageName"></span>
-        <button class="ic-btn del" onclick="removeBgImage()">✕</button>
-      </div>
+    <div class="section-label">배경 이미지</div>
+    <label class="upload-area" for="bgImgInput">+ PNG 배경 이미지 업로드</label>
+    <input type="file" id="bgImgInput" accept="image/*" style="display:none" onchange="handleBgImg(event)">
+    <div id="bgImgInfo" style="display:none" class="file-info">
+      <span id="bgImgName"></span>
+      <button class="ic-btn danger" onclick="removeBgImg()">✕</button>
     </div>
+
     <div class="sep"></div>
-    <div style="font-size:11px;color:#e8001e;margin-bottom:10px;font-weight:500;">텍스트 영역</div>
+    <div class="section-label">텍스트 영역</div>
     <div class="color-row">
       <span class="color-label">배경색</span>
-      <input type="color" class="form-input" id="pTextBg" value="#0a0a14" style="width:56px;flex:none;" oninput="updatePreview()">
-      <span class="color-label" style="margin-left:8px;">글자색</span>
-      <input type="color" class="form-input" id="pTextColor" value="#ffffff" style="width:56px;flex:none;" oninput="updatePreview()">
+      <input type="color" class="form-input" id="pTextBg" value="#0a0a14" oninput="updatePreview()">
+      <span class="color-label" style="margin-left:8px">글자색</span>
+      <input type="color" class="form-input" id="pTextColor" value="#ffffff" oninput="updatePreview()">
     </div>
     <div class="form-group">
-      <div class="form-label">배경 투명도</div>
+      <label class="form-label">배경 투명도</label>
       <div class="form-row">
-        <input type="range" id="pTextBgAlpha" min="0" max="100" value="88" oninput="updatePreview()">
-        <span class="range-val" id="pTextBgAlphaVal">88%</span>
+        <input type="range" id="pBgAlpha" min="0" max="100" value="88" oninput="updatePreview()">
+        <span class="range-val" id="pBgAlphaVal">88%</span>
       </div>
     </div>
     <div class="form-group">
-      <div class="form-label">글자 크기 (px)</div>
+      <label class="form-label">글자 크기 (px)</label>
       <div class="form-row">
         <input type="range" id="pFontSize" min="12" max="150" value="26" oninput="updatePreview()">
         <span class="range-val" id="pFontSizeVal">26px</span>
       </div>
     </div>
     <div class="form-group">
-      <div class="form-label">폰트</div>
+      <label class="form-label">폰트</label>
       <select class="form-input" id="pFont" onchange="updatePreview()">
         <option value="'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif">애플 SD 고딕 (기본)</option>
         <option value="'Noto Sans KR',sans-serif">Noto Sans KR</option>
@@ -265,7 +289,7 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
       </select>
     </div>
     <div class="form-group">
-      <div class="form-label">글자 굵기</div>
+      <label class="form-label">글자 굵기</label>
       <select class="form-input" id="pFontWeight" onchange="updatePreview()">
         <option value="400">보통</option>
         <option value="500" selected>중간</option>
@@ -273,7 +297,7 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
       </select>
     </div>
     <div class="form-group">
-      <div class="form-label">텍스트 정렬</div>
+      <label class="form-label">텍스트 정렬</label>
       <select class="form-input" id="pTextAlign" onchange="updatePreview()">
         <option value="left">왼쪽 정렬</option>
         <option value="center">가운데 정렬</option>
@@ -281,147 +305,160 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
       </select>
     </div>
     <div class="form-group">
-      <div class="form-label">좌측 여백 (px)</div>
+      <label class="form-label">좌측 여백 (px)</label>
       <div class="form-row">
-        <input type="range" id="pPaddingLeft" min="0" max="400" value="24" oninput="updatePreview()">
-        <span class="range-val" id="pPaddingLeftVal">24px</span>
+        <input type="range" id="pPadLeft" min="0" max="400" value="24" oninput="updatePreview()">
+        <span class="range-val" id="pPadLeftVal">24px</span>
       </div>
     </div>
+
     <div class="sep"></div>
-    <div style="font-size:11px;color:#e8001e;margin-bottom:10px;font-weight:500;">폰트 업로드</div>
-    <div class="form-group">
-      <label class="upload-btn" for="fontInput">+ 폰트 파일 업로드 (.ttf .otf .woff2)</label>
-      <input type="file" id="fontInput" accept=".ttf,.otf,.woff,.woff2" style="display:none" onchange="handleFont(event)">
-      <div id="fontInfo" style="display:none;" class="uploaded-file">
-        <span id="fontName"></span>
-        <button class="ic-btn del" onclick="removeFont()">✕</button>
-      </div>
+    <div class="section-label">폰트 업로드</div>
+    <label class="upload-area" for="fontInput">+ 폰트 파일 업로드 (.ttf .otf .woff2)</label>
+    <input type="file" id="fontInput" accept=".ttf,.otf,.woff,.woff2" style="display:none" onchange="handleFont(event)">
+    <div id="fontInfo" style="display:none" class="file-info">
+      <span id="fontName"></span>
+      <button class="ic-btn danger" onclick="removeFont()">✕</button>
     </div>
+
     <div class="sep"></div>
-    <div style="font-size:11px;color:#e8001e;margin-bottom:10px;font-weight:500;">바 크기 (1920×1080 기준 px)</div>
+    <div class="section-label">바 크기 (1920×1080 기준 px)</div>
     <div class="form-group">
-      <div class="form-label">가로 너비 (px)</div>
-      <input type="number" class="form-input" id="pWidth" value="1920" min="100" max="1920" oninput="updatePreview()">
+      <label class="form-label">가로 너비 (px)</label>
+      <input type="number" class="form-input" id="pWidth" value="1920" min="100" max="3840">
     </div>
     <div class="form-group">
-      <div class="form-label">세로 높이 (px)</div>
-      <input type="number" class="form-input" id="pHeight" value="60" min="20" max="400" oninput="updatePreview()">
+      <label class="form-label">세로 높이 (px)</label>
+      <input type="number" class="form-input" id="pHeight" value="60" min="20" max="500">
     </div>
+
     <div class="sep"></div>
-    <div style="font-size:11px;color:#e8001e;margin-bottom:10px;font-weight:500;">테두리</div>
+    <div class="section-label">테두리</div>
     <div class="color-row">
       <span class="color-label">테두리 색</span>
-      <input type="color" class="form-input" id="pBorderColor" value="#000000" style="width:56px;flex:none;" oninput="updatePreview()">
-      <span class="color-label" style="margin-left:8px;">두께 (px)</span>
-      <input type="number" class="form-input" id="pBorderWidth" value="0" min="0" max="10" style="width:64px;flex:none;" oninput="updatePreview()">
+      <input type="color" class="form-input" id="pBorderColor" value="#000000" oninput="updatePreview()">
+      <span class="color-label" style="margin-left:8px">두께 (px)</span>
+      <input type="number" class="form-input" id="pBorderWidth" value="0" min="0" max="10" style="width:64px;flex:none" oninput="updatePreview()">
     </div>
+
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal()">취소</button>
-      <button class="btn btn-danger btn-sm" id="deletePresetBtn" onclick="deleteEditingPreset()" style="display:none;">삭제</button>
-      <button class="btn btn-primary" onclick="savePreset()">저장</button>
+      <button class="btn btn-gray" onclick="closePresetModal()">취소</button>
+      <button class="btn btn-danger btn-sm" id="deletePresetBtn" onclick="deletePreset()" style="display:none">삭제</button>
+      <button class="btn btn-red" onclick="savePreset()">저장</button>
     </div>
   </div>
 </div>
 
 <!-- 계정 모달 -->
-<div class="modal-bg" id="accountModalBg" style="display:none;" onclick="closeAccountModalBg(event)">
-  <div class="modal" style="width:420px;">
+<div class="modal-bg" id="accountModal" style="display:none" onclick="if(event.target===this)closeAccountModal()">
+  <div class="modal" style="width:400px">
     <div class="modal-title">계정 설정</div>
-    <div id="profileInfo" style="margin-bottom:20px;">
-      <div class="profile-row"><span class="profile-key">이름</span><span class="profile-val" id="pInfoName">-</span></div>
-      <div class="profile-row"><span class="profile-key">부서</span><span class="profile-val" id="pInfoDept">-</span></div>
-      <div class="profile-row"><span class="profile-key">전화</span><span class="profile-val" id="pInfoPhone">-</span></div>
-      <div class="profile-row"><span class="profile-key">이메일</span><span class="profile-val" id="pInfoEmail">-</span></div>
+    <div style="margin-bottom:16px">
+      <div class="profile-row"><span class="profile-key">이름</span><span class="profile-val" id="pInfoName"></span></div>
+      <div class="profile-row"><span class="profile-key">부서</span><span class="profile-val" id="pInfoDept"></span></div>
+      <div class="profile-row"><span class="profile-key">전화</span><span class="profile-val" id="pInfoPhone"></span></div>
+      <div class="profile-row"><span class="profile-key">이메일</span><span class="profile-val" id="pInfoEmail"></span></div>
     </div>
     <div class="sep"></div>
-    <div style="font-size:12px;color:#888;margin-bottom:12px;margin-top:12px;">비밀번호 변경</div>
+    <p style="font-size:12px;color:#666;margin:12px 0">비밀번호 변경</p>
     <div class="form-group">
-      <div class="form-label">새 비밀번호</div>
-      <input type="password" class="form-input" id="newPassword" placeholder="8자 이상">
+      <label class="form-label">새 비밀번호</label>
+      <input type="password" class="form-input" id="newPw" placeholder="8자 이상">
     </div>
     <div class="form-group">
-      <div class="form-label">비밀번호 확인</div>
-      <input type="password" class="form-input" id="confirmPassword" placeholder="비밀번호 재입력">
+      <label class="form-label">비밀번호 확인</label>
+      <input type="password" class="form-input" id="confirmPw" placeholder="재입력">
     </div>
-    <div id="pwError" class="error-msg"></div>
-    <div id="pwSuccess" class="success-msg"></div>
+    <div id="pwErr" class="msg-err"></div>
+    <div id="pwOk" class="msg-ok"></div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeAccountModal()">닫기</button>
-      <button class="btn btn-primary" onclick="changePassword()">비밀번호 변경</button>
+      <button class="btn btn-gray" onclick="closeAccountModal()">닫기</button>
+      <button class="btn btn-red" onclick="changePw()">비밀번호 변경</button>
     </div>
   </div>
 </div>
 
-<input type="file" id="fileInput" accept=".json,.txt" style="display:none" onchange="handleImport(event)">
-<input type="file" id="presetFileInput" accept=".json" style="display:none" onchange="handleImportPresets(event)">
+<input type="file" id="captionFileInput" accept=".json,.txt" style="display:none" onchange="handleCaptionImport(event)">
+<input type="file" id="presetFileInput" accept=".json" style="display:none" onchange="handlePresetImport(event)">
 
 <script>
-const SUPABASE_URL = 'https://mtkppcexpubazjeceyvj.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10a3BwY2V4cHViYXpqZWNleXZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NjA5NDIsImV4cCI6MjA5MjIzNjk0Mn0.3ruVRo3JIWUipK5-as9kTzYjRZa32K_TX1X_vSqi_v4';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ── Supabase ──────────────────────────────────────────────
+const SB = supabase.createClient(
+  'https://mtkppcexpubazjeceyvj.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10a3BwY2V4cHViYXpqZWNleXZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NjA5NDIsImV4cCI6MjA5MjIzNjk0Mn0.3ruVRo3JIWUipK5-as9kTzYjRZa32K_TX1X_vSqi_v4'
+);
 
+// ── 상태 ──────────────────────────────────────────────────
 let currentUser = null;
-let state = { captions:[], active_index:-1, pos:{x:0,y:0}, anim:true, presets:[] };
+let state = { captions: [], active_index: -1, pos: { x: 0, y: 0 }, anim: true, presets: [] };
 let editingPresetId = null;
-let tempBgImage = null;
+let tempBgImg = null;
 let tempFont = null;
 let tempFontName = null;
-let pushing = false;
+let isPushing = false;
 
-function getDefaultPresets() {
+// ── 기본 프리셋 ───────────────────────────────────────────
+function defaultPresets() {
   return [
-    { id:'default', name:'기본 자막', textBg:'#ffffff', textBgAlpha:95, textColor:'#111111', fontSize:26, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'500', textAlign:'left', paddingLeft:24, borderColor:'#000000', borderWidth:1, width:1920, height:60, bgImage:null, customFont:null, customFontName:null },
-    { id:'breaking', name:'속보', textBg:'#1a0000', textBgAlpha:92, textColor:'#ffffff', fontSize:26, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'700', textAlign:'left', paddingLeft:24, borderColor:'#880000', borderWidth:1, width:1920, height:60, bgImage:null, customFont:null, customFontName:null },
-    { id:'interview', name:'인터뷰', textBg:'#0a1a2a', textBgAlpha:90, textColor:'#e8e8e8', fontSize:22, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'400', textAlign:'left', paddingLeft:24, borderColor:'#1a4a8a', borderWidth:1, width:1920, height:60, bgImage:null, customFont:null, customFontName:null }
+    { id: 'default',   name: '기본 자막', textBg: '#ffffff', bgAlpha: 95,  textColor: '#111111', fontSize: 26, font: "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight: '500', textAlign: 'left', padLeft: 24, borderColor: '#000000', borderWidth: 1, width: 1920, height: 60, bgImg: null, customFont: null, customFontName: null },
+    { id: 'breaking',  name: '속보',     textBg: '#1a0000', bgAlpha: 92,  textColor: '#ffffff', fontSize: 26, font: "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight: '700', textAlign: 'left', padLeft: 24, borderColor: '#880000', borderWidth: 1, width: 1920, height: 60, bgImg: null, customFont: null, customFontName: null },
+    { id: 'interview', name: '인터뷰',   textBg: '#0a1a2a', bgAlpha: 90,  textColor: '#e8e8e8', fontSize: 22, font: "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight: '400', textAlign: 'left', padLeft: 24, borderColor: '#1a4a8a', borderWidth: 1, width: 1920, height: 60, bgImg: null, customFont: null, customFontName: null }
   ];
 }
 
-function hexToRgba(hex, alpha) {
-  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
-  return `rgba(${r},${g},${b},${(alpha/100).toFixed(2)})`;
+// ── 유틸 ──────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function hexRgba(hex, a) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${(a/100).toFixed(2)})`;
 }
+function preset(id) { return state.presets.find(p => p.id === id) || state.presets[0] || defaultPresets()[0]; }
 
-function getPresetById(id) { return state.presets.find(p=>p.id===id)||state.presets[0]; }
-
+// ── 초기화 ────────────────────────────────────────────────
 async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) { location.href='index.html'; return; }
+  const { data: { session } } = await SB.auth.getSession();
+  if (!session) { location.href = 'index.html'; return; }
   currentUser = session.user;
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-  const name = profile?.name || currentUser.email;
-  document.getElementById('userName').textContent = name;
+
+  const { data: profile } = await SB.from('profiles').select('*').eq('id', currentUser.id).single();
+  document.getElementById('userName').textContent = profile?.name || currentUser.email;
   document.getElementById('pInfoName').textContent = profile?.name || '-';
   document.getElementById('pInfoDept').textContent = profile?.department || '-';
   document.getElementById('pInfoPhone').textContent = profile?.phone || '-';
   document.getElementById('pInfoEmail').textContent = currentUser.email;
-  const uid = currentUser.id;
-  const obsUrl = `${location.origin}/overlay.html?uid=${uid}`;
-  document.getElementById('obsUrl').textContent = obsUrl;
+
+  document.getElementById('obsUrl').textContent = `${location.origin}/overlay.html?uid=${currentUser.id}`;
+
   await loadState();
-  subscribeRealtime();
+  subscribe();
 }
 
 async function loadState() {
-  const uid = currentUser.id;
-  let { data, error } = await sb.from('caption_state').select('*').eq('id', uid).single();
+  const { data, error } = await SB.from('caption_state').select('*').eq('id', currentUser.id).single();
   if (error || !data) {
-    await sb.from('caption_state').insert({ id: uid, user_id: uid, captions:[], active_index:-1, pos:{x:0,y:0}, anim:true, presets: getDefaultPresets() });
-    data = { captions:[], active_index:-1, pos:{x:0,y:0}, anim:true, presets: getDefaultPresets() };
+    const fresh = { id: currentUser.id, user_id: currentUser.id, captions: [], active_index: -1, pos: { x:0, y:0 }, anim: true, presets: defaultPresets() };
+    await SB.from('caption_state').insert(fresh);
+    applyData(fresh);
+  } else {
+    applyData(data);
   }
-  state.captions = data.captions || [];
-  state.active_index = data.active_index ?? -1;
-  state.pos = data.pos || {x:0,y:0};
-  state.anim = data.anim !== false;
-  state.presets = (data.presets && data.presets.length) ? data.presets : getDefaultPresets();
   setStatus(true);
   renderAll();
 }
 
+function applyData(d) {
+  state.captions = d.captions || [];
+  state.active_index = d.active_index ?? -1;
+  state.pos = d.pos || { x:0, y:0 };
+  state.anim = d.anim !== false;
+  state.presets = (d.presets && d.presets.length) ? d.presets : defaultPresets();
+}
+
 async function pushState() {
-  if (pushing || !currentUser) return;
-  pushing = true;
+  if (isPushing || !currentUser) return;
+  isPushing = true;
   state.anim = document.getElementById('animToggle').checked;
-  await sb.from('caption_state').update({
+  const { error } = await SB.from('caption_state').update({
     captions: state.captions,
     active_index: state.active_index,
     pos: state.pos,
@@ -429,181 +466,203 @@ async function pushState() {
     presets: state.presets,
     updated_at: new Date().toISOString()
   }).eq('id', currentUser.id);
-  pushing = false;
+  if (error) console.error('pushState error:', error);
+  isPushing = false;
 }
 
-function subscribeRealtime() {
-  sb.channel('caption_' + currentUser.id)
-    .on('postgres_changes', { event:'UPDATE', schema:'public', table:'caption_state', filter:`id=eq.${currentUser.id}` }, payload => {
-      const d = payload.new;
-      state.captions = d.captions || [];
-      state.active_index = d.active_index ?? -1;
-      state.pos = d.pos || {x:0,y:0};
-      state.anim = d.anim !== false;
-      if (d.presets && d.presets.length) state.presets = d.presets;
+function subscribe() {
+  SB.channel('ctrl_' + currentUser.id)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'caption_state', filter: `id=eq.${currentUser.id}` }, payload => {
+      applyData(payload.new);
       renderAll();
     }).subscribe();
 }
 
 function setStatus(ok) {
-  document.getElementById('statusDot').className='dot'+(ok?' live':'');
-  document.getElementById('statusText').textContent=ok?'연결됨':'연결 실패';
+  document.getElementById('statusDot').className = 'status-dot' + (ok ? ' live' : '');
+  document.getElementById('statusText').textContent = ok ? '연결됨' : '연결 실패';
 }
 
-async function doLogout() {
-  await sb.auth.signOut();
-  location.href = 'index.html';
+async function logout() { await SB.auth.signOut(); location.href = 'index.html'; }
+
+// ── 렌더 ──────────────────────────────────────────────────
+function renderAll() {
+  renderList();
+  renderOnAir();
+  renderPresets();
+  renderPosUI();
+  renderStyleSel();
 }
-
-function openAccountModal() { document.getElementById('accountModalBg').style.display='flex'; }
-function closeAccountModal() { document.getElementById('accountModalBg').style.display='none'; }
-function closeAccountModalBg(e) { if(e.target===document.getElementById('accountModalBg')) closeAccountModal(); }
-
-async function changePassword() {
-  const pw = document.getElementById('newPassword').value;
-  const pw2 = document.getElementById('confirmPassword').value;
-  const errEl = document.getElementById('pwError');
-  const sucEl = document.getElementById('pwSuccess');
-  errEl.textContent=''; sucEl.textContent='';
-  if (!pw || !pw2) { errEl.textContent='비밀번호를 입력해주세요.'; return; }
-  if (pw.length < 8) { errEl.textContent='8자 이상 입력해주세요.'; return; }
-  if (pw !== pw2) { errEl.textContent='비밀번호가 일치하지 않습니다.'; return; }
-  const { error } = await sb.auth.updateUser({ password: pw });
-  if (error) { errEl.textContent='변경 실패: ' + error.message; return; }
-  sucEl.textContent='비밀번호가 변경됐습니다.';
-  document.getElementById('newPassword').value='';
-  document.getElementById('confirmPassword').value='';
-}
-
-function copyUrl() {
-  const url = document.getElementById('obsUrl').textContent;
-  navigator.clipboard.writeText(url).then(()=>{ const btn=document.getElementById('copyUrlBtn'); btn.textContent='복사됨!'; setTimeout(()=>btn.textContent='URL 복사',1500); });
-}
-
-function renderAll() { renderList(); renderOnAir(); renderPresets(); renderPositionUI(); populateStyleSelects(); }
-function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function renderList() {
-  const el=document.getElementById('captionList');
-  if(!state.captions.length){el.innerHTML='<div class="empty-state">자막 목록이 비어있습니다</div>';return;}
-  el.innerHTML=state.captions.map((c,i)=>{
-    const preset=getPresetById(c.styleId);
-    const isActive=i===state.active_index;
-    if(c._editing) return `<div class="caption-item editing">
-      <span class="c-num">${i+1}</span>
-      <div class="c-body">
-        <textarea class="edit-textarea" id="editTa_${i}" onkeydown="editKeydown(event,${i})">${escHtml(c.text)}</textarea>
-        <select class="edit-style-select" id="editStyle_${i}">${state.presets.map(p=>`<option value="${p.id}"${p.id===c.styleId?' selected':''}>${p.name}</option>`).join('')}</select>
-      </div>
-      <div class="c-actions">
-        <button class="ic-btn edit-save" onclick="saveEdit(${i})">✓</button>
-        <button class="ic-btn" onclick="cancelEdit(${i})">✕</button>
-      </div></div>`;
-    return `<div class="caption-item${isActive?' active':''}" onclick="selectCaption(${i})">
-      <span class="c-num">${i+1}</span>
-      <div class="c-body">
-        <div class="c-text">${escHtml(c.text)}</div>
-        <span class="c-style-tag" style="background:${hexToRgba(preset.textBg,preset.textBgAlpha)};color:${preset.textColor};">${escHtml(preset.name)}</span>
-      </div>
-      <div class="c-actions">
-        ${isActive?'<span class="onair-badge">ON AIR</span>':''}
-        <button class="ic-btn" onclick="event.stopPropagation();startEdit(${i})">✎</button>
-        <button class="ic-btn del" onclick="event.stopPropagation();deleteCaption(${i})">✕</button>
-      </div></div>`;
+  const el = document.getElementById('captionList');
+  if (!state.captions.length) { el.innerHTML = '<div class="empty-state">자막 목록이 비어있습니다</div>'; return; }
+  el.innerHTML = state.captions.map((c, i) => {
+    const p = preset(c.styleId);
+    const isActive = i === state.active_index;
+    if (c._editing) return `
+      <div class="cap-item editing">
+        <span class="cap-num">${i+1}</span>
+        <div class="cap-body">
+          <textarea class="edit-ta" id="editTa_${i}" onkeydown="editKey(event,${i})">${esc(c.text)}</textarea>
+          <select class="edit-sel" id="editSel_${i}">
+            ${state.presets.map(p => `<option value="${p.id}"${p.id===c.styleId?' selected':''}>${esc(p.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="cap-actions">
+          <button class="ic-btn confirm" onclick="saveEdit(${i})">✓</button>
+          <button class="ic-btn" onclick="cancelEdit(${i})">✕</button>
+        </div>
+      </div>`;
+    return `
+      <div class="cap-item${isActive?' active':''}" onclick="selectCaption(${i})">
+        <span class="cap-num">${i+1}</span>
+        <div class="cap-body">
+          <div class="cap-text">${esc(c.text)}</div>
+          <span class="cap-tag" style="background:${hexRgba(p.textBg,p.bgAlpha)};color:${p.textColor}">${esc(p.name)}</span>
+        </div>
+        <div class="cap-actions">
+          ${isActive ? '<span class="onair-badge">ON AIR</span>' : ''}
+          <button class="ic-btn" onclick="event.stopPropagation();startEdit(${i})">✎</button>
+          <button class="ic-btn danger" onclick="event.stopPropagation();deleteCaption(${i})">✕</button>
+        </div>
+      </div>`;
   }).join('');
-  state.captions.forEach((c,i)=>{if(c._editing)setTimeout(()=>{const t=document.getElementById('editTa_'+i);if(t){t.focus();t.selectionStart=t.value.length;}},30);});
+  state.captions.forEach((c, i) => {
+    if (c._editing) setTimeout(() => { const t = document.getElementById('editTa_'+i); if(t){t.focus();t.selectionStart=t.value.length;} }, 30);
+  });
 }
 
 function renderOnAir() {
-  const dot=document.getElementById('onairDot'),txt=document.getElementById('onairText');
-  const idx=state.active_index;
-  if(idx>=0&&state.captions[idx]){const p=getPresetById(state.captions[idx].styleId);dot.style.background=p.textBg||'#333';txt.className='onair-text';txt.textContent=state.captions[idx].text;}
-  else{dot.style.background='#333';txt.className='onair-empty';txt.textContent='자막을 선택하세요';}
+  const dot = document.getElementById('onairDot');
+  const txt = document.getElementById('onairText');
+  const idx = state.active_index;
+  if (idx >= 0 && state.captions[idx]) {
+    const p = preset(state.captions[idx].styleId);
+    dot.style.background = p.textColor;
+    txt.className = 'onair-text';
+    txt.textContent = state.captions[idx].text;
+  } else {
+    dot.style.background = '#333';
+    txt.className = 'onair-empty';
+    txt.textContent = '자막을 선택하세요';
+  }
 }
 
 function renderPresets() {
-  const el=document.getElementById('presetList');
-  if(!state.presets.length){el.innerHTML='<div class="empty-state">스타일 없음</div>';return;}
-  el.innerHTML=state.presets.map(p=>`
+  const el = document.getElementById('presetList');
+  if (!state.presets.length) { el.innerHTML = '<div class="empty-state">스타일 없음</div>'; return; }
+  el.innerHTML = state.presets.map(p => `
     <div class="preset-item">
-      <div class="preset-preview" style="border:${p.borderWidth}px solid ${p.borderColor};${p.bgImage?`background:url(${p.bgImage}) center/cover;`:`background:${hexToRgba(p.textBg,p.textBgAlpha)};`}">
-        <div style="color:${p.textColor};font-size:8px;padding:0 6px;flex:1;display:flex;align-items:center;font-weight:${p.fontWeight};">Aa</div>
+      <div class="preset-thumb" style="${p.bgImg?`background:url(${p.bgImg}) center/cover`:`background:${hexRgba(p.textBg,p.bgAlpha)}`};border:${p.borderWidth}px solid ${p.borderColor}">
+        <span style="color:${p.textColor};font-size:9px;padding:0 6px;font-weight:${p.fontWeight}">Aa</span>
       </div>
       <div class="preset-info">
-        <div class="preset-name">${escHtml(p.name)}</div>
-        <div class="preset-desc">${p.width}×${p.height}px · ${p.fontSize}px · ${p.textAlign==='center'?'가운데':p.textAlign==='right'?'오른쪽':'왼쪽'}</div>
+        <div class="preset-name">${esc(p.name)}</div>
+        <div class="preset-desc">${p.width}×${p.height}px · ${p.fontSize}px · ${{left:'왼쪽',center:'가운데',right:'오른쪽'}[p.textAlign]||'왼쪽'}</div>
       </div>
-      <div class="preset-actions">
+      <div class="row">
         <button class="ic-btn" onclick="duplicatePreset('${p.id}')" title="복제">⧉</button>
         <button class="ic-btn" onclick="openPresetModal('${p.id}')" title="편집">✎</button>
       </div>
     </div>`).join('');
 }
 
-function renderPositionUI() {
-  document.getElementById('posX').value=state.pos.x;
-  document.getElementById('posXNum').value=state.pos.x;
-  document.getElementById('posY').value=state.pos.y;
-  document.getElementById('posYNum').value=state.pos.y;
-  document.getElementById('animToggle').checked=state.anim;
+function renderPosUI() {
+  document.getElementById('posX').value = state.pos.x;
+  document.getElementById('posXNum').value = state.pos.x;
+  document.getElementById('posY').value = state.pos.y;
+  document.getElementById('posYNum').value = state.pos.y;
+  document.getElementById('animToggle').checked = state.anim;
 }
 
-function populateStyleSelects() {
-  const opts=state.presets.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
-  document.getElementById('addStyleSelect').innerHTML=opts;
+function renderStyleSel() {
+  document.getElementById('addStyleSel').innerHTML = state.presets.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
 }
 
-function selectCaption(i){state.active_index=i;renderAll();pushState();}
-function clearCaption(){state.active_index=-1;renderAll();pushState();}
-function prevCaption(){if(!state.captions.length)return;state.active_index=state.active_index<=0?state.captions.length-1:state.active_index-1;renderAll();pushState();}
-function nextCaption(){if(!state.captions.length)return;state.active_index=state.active_index>=state.captions.length-1?0:state.active_index+1;renderAll();pushState();}
+// ── 자막 조작 ─────────────────────────────────────────────
+function selectCaption(i) { state.active_index = i; renderAll(); pushState(); }
+function hideCaption() { state.active_index = -1; renderAll(); pushState(); }
+function prevCaption() { if (!state.captions.length) return; state.active_index = state.active_index <= 0 ? state.captions.length-1 : state.active_index-1; renderAll(); pushState(); }
+function nextCaption() { if (!state.captions.length) return; state.active_index = state.active_index >= state.captions.length-1 ? 0 : state.active_index+1; renderAll(); pushState(); }
 
-function addCaption(){
-  const ta=document.getElementById('newCaption'),text=ta.value.trim();
-  if(!text)return;
-  const styleId=document.getElementById('addStyleSelect').value||state.presets[0]?.id;
-  state.captions.push({text,styleId});ta.value='';renderAll();pushState();
-}
-function deleteCaption(i){
-  state.captions.splice(i,1);
-  if(state.active_index===i)state.active_index=-1;
-  else if(state.active_index>i)state.active_index--;
-  renderAll();pushState();
-}
-function clearAll(){if(!confirm('전체 삭제할까요?'))return;state.captions=[];state.active_index=-1;renderAll();pushState();}
-function startEdit(i){state.captions.forEach(c=>delete c._editing);state.captions[i]._editing=true;renderList();}
-function saveEdit(i){
-  const ta=document.getElementById('editTa_'+i),sel=document.getElementById('editStyle_'+i);
-  if(ta)state.captions[i].text=ta.value.trim()||state.captions[i].text;
-  if(sel)state.captions[i].styleId=sel.value;
-  delete state.captions[i]._editing;renderAll();pushState();
-}
-function cancelEdit(i){delete state.captions[i]._editing;renderList();}
-function editKeydown(e,i){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();saveEdit(i);}if(e.key==='Escape')cancelEdit(i);}
-
-function syncPos(){
-  state.pos.x=parseInt(document.getElementById('posX').value);
-  state.pos.y=parseInt(document.getElementById('posY').value);
-  document.getElementById('posXNum').value=state.pos.x;
-  document.getElementById('posYNum').value=state.pos.y;
-  pushState();
-}
-function syncPosNum(){
-  state.pos.x=parseInt(document.getElementById('posXNum').value)||0;
-  state.pos.y=parseInt(document.getElementById('posYNum').value)||0;
-  document.getElementById('posX').value=state.pos.x;
-  document.getElementById('posY').value=state.pos.y;
-  pushState();
-}
-
-function duplicatePreset(id) {
-  const original = getPresetById(id);
-  if (!original) return;
-  const copy = JSON.parse(JSON.stringify(original));
-  copy.id = 'p_' + Date.now();
-  copy.name = original.name + ' 사본';
-  state.presets.push(copy);
+function addCaption() {
+  const ta = document.getElementById('newCaption');
+  const text = ta.value.trim();
+  if (!text) return;
+  const styleId = document.getElementById('addStyleSel').value || state.presets[0]?.id;
+  state.captions.push({ text, styleId });
+  ta.value = '';
   renderAll(); pushState();
+}
+
+function deleteCaption(i) {
+  state.captions.splice(i, 1);
+  if (state.active_index === i) state.active_index = -1;
+  else if (state.active_index > i) state.active_index--;
+  renderAll(); pushState();
+}
+
+function clearAll() {
+  if (!confirm('자막 목록을 전체 삭제할까요?')) return;
+  state.captions = []; state.active_index = -1;
+  renderAll(); pushState();
+}
+
+function startEdit(i) { state.captions.forEach(c => delete c._editing); state.captions[i]._editing = true; renderList(); }
+function cancelEdit(i) { delete state.captions[i]._editing; renderList(); }
+function saveEdit(i) {
+  const ta = document.getElementById('editTa_'+i), sel = document.getElementById('editSel_'+i);
+  if (ta) state.captions[i].text = ta.value.trim() || state.captions[i].text;
+  if (sel) state.captions[i].styleId = sel.value;
+  delete state.captions[i]._editing;
+  renderAll(); pushState();
+}
+function editKey(e, i) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveEdit(i); }
+  if (e.key === 'Escape') cancelEdit(i);
+}
+
+// ── 위치 ──────────────────────────────────────────────────
+function syncPos(from) {
+  if (from === 'range') {
+    state.pos.x = parseInt(document.getElementById('posX').value);
+    state.pos.y = parseInt(document.getElementById('posY').value);
+    document.getElementById('posXNum').value = state.pos.x;
+    document.getElementById('posYNum').value = state.pos.y;
+  } else {
+    state.pos.x = parseInt(document.getElementById('posXNum').value) || 0;
+    state.pos.y = parseInt(document.getElementById('posYNum').value) || 0;
+    document.getElementById('posX').value = state.pos.x;
+    document.getElementById('posY').value = state.pos.y;
+  }
+  pushState();
+}
+
+// ── 파일 내보내기/불러오기 ────────────────────────────────
+function exportCaptions() {
+  const blob = new Blob([JSON.stringify({ captions: state.captions }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'captions_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
+}
+function importCaptions() { document.getElementById('captionFileInput').click(); }
+function handleCaptionImport(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      if (file.name.endsWith('.json')) {
+        const data = JSON.parse(ev.target.result);
+        if (data.captions) state.captions = [...state.captions, ...data.captions];
+      } else {
+        const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+        const styleId = state.presets[0]?.id || 'default';
+        lines.forEach(text => state.captions.push({ text, styleId }));
+      }
+      renderAll(); pushState();
+    } catch { alert('파일 형식 오류'); }
+  };
+  reader.readAsText(file); e.target.value = '';
 }
 
 function exportPresets() {
@@ -611,172 +670,26 @@ function exportPresets() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = 'presets_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
 }
-
 function importPresets() { document.getElementById('presetFileInput').click(); }
-
-function handleImportPresets(e) {
+function handlePresetImport(e) {
   const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
     try {
       const data = JSON.parse(ev.target.result);
-      if (!data.presets || !Array.isArray(data.presets)) { alert('올바른 스타일 파일이 아닙니다.'); return; }
-      const existingIds = new Set(state.presets.map(p => p.id));
-      let added = 0;
-      data.presets.forEach(p => {
-        if (existingIds.has(p.id)) p.id = 'p_' + Date.now() + '_' + added;
-        state.presets.push(p);
-        added++;
-      });
+      if (!data.presets || !Array.isArray(data.presets)) { alert('올바른 프리셋 파일이 아닙니다.'); return; }
+      const imported = data.presets.map(p => ({ ...p, id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) }));
+      state.presets = [...state.presets, ...imported];
       renderAll(); pushState();
-      alert(`${added}개 스타일을 불러왔습니다.`);
-    } catch(err) { alert('파일 형식 오류'); }
+      alert(`${imported.length}개 스타일을 불러왔습니다.`);
+    } catch { alert('파일 형식 오류'); }
   };
   reader.readAsText(file); e.target.value = '';
 }
-  const blob=new Blob([JSON.stringify({captions:state.captions,presets:state.presets},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='captions_'+new Date().toISOString().slice(0,10)+'.json';a.click();
-}
-function importFile(){document.getElementById('fileInput').click();}
-function handleImport(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    try{
-      if(file.name.endsWith('.json')){const data=JSON.parse(ev.target.result);if(data.captions)state.captions=[...state.captions,...data.captions];if(data.presets)state.presets=data.presets;}
-      else{const lines=ev.target.result.split('\n').map(l=>l.trim()).filter(Boolean);const styleId=state.presets[0]?.id||'default';lines.forEach(text=>state.captions.push({text,styleId}));}
-      renderAll();pushState();
-    }catch(err){alert('파일 형식 오류');}
-  };
-  reader.readAsText(file);e.target.value='';
-}
 
-function openPresetModal(id){
-  editingPresetId=id;tempBgImage=null;tempFont=null;tempFontName=null;
-  const isNew=!id;
-  document.getElementById('modalTitle').textContent=isNew?'새 스타일 만들기':'스타일 편집';
-  document.getElementById('deletePresetBtn').style.display=isNew?'none':'inline-block';
-  const p=isNew?{name:'',textBg:'#0a0a14',textBgAlpha:88,textColor:'#ffffff',fontSize:26,font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif",fontWeight:'500',textAlign:'left',paddingLeft:24,borderColor:'#000000',borderWidth:0,width:1920,height:60,bgImage:null,customFont:null,customFontName:null}:getPresetById(id);
-  document.getElementById('pName').value=p.name;
-  document.getElementById('pTextBg').value=p.textBg;
-  document.getElementById('pTextBgAlpha').value=p.textBgAlpha;
-  document.getElementById('pTextColor').value=p.textColor;
-  document.getElementById('pFontSize').value=p.fontSize;
-  document.getElementById('pFont').value=p.font;
-  document.getElementById('pFontWeight').value=p.fontWeight;
-  document.getElementById('pTextAlign').value=p.textAlign||'left';
-  document.getElementById('pPaddingLeft').value=p.paddingLeft??24;
-  document.getElementById('pPaddingLeftVal').textContent=(p.paddingLeft??24)+'px';
-  document.getElementById('pBorderColor').value=p.borderColor;
-  document.getElementById('pBorderWidth').value=p.borderWidth;
-  document.getElementById('pWidth').value=p.width||1920;
-  document.getElementById('pHeight').value=p.height||60;
-  if(p.bgImage){tempBgImage=p.bgImage;document.getElementById('bgImageInfo').style.display='flex';document.getElementById('bgImageName').textContent='배경 이미지 설정됨';}
-  else document.getElementById('bgImageInfo').style.display='none';
-  if(p.customFontName){tempFont=p.customFont;document.getElementById('fontInfo').style.display='flex';document.getElementById('fontName').textContent=p.customFontName;}
-  else document.getElementById('fontInfo').style.display='none';
-  updatePreview();
-  document.getElementById('modalBg').style.display='flex';
-}
-function closeModal(){document.getElementById('modalBg').style.display='none';}
-function closeModalBg(e){if(e.target===document.getElementById('modalBg'))closeModal();}
-
-function handleBgImage(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{tempBgImage=ev.target.result;document.getElementById('bgImageInfo').style.display='flex';document.getElementById('bgImageName').textContent=file.name;updatePreview();};
-  reader.readAsDataURL(file);e.target.value='';
-}
-function removeBgImage(){tempBgImage=null;document.getElementById('bgImageInfo').style.display='none';updatePreview();}
-
-async function handleFont(e){
-  const file=e.target.files[0];if(!file)return;
-  const fontInfoEl=document.getElementById('fontInfo');
-  const fontNameEl=document.getElementById('fontName');
-  fontNameEl.textContent='업로드 중...';
-  fontInfoEl.style.display='flex';
-  const ext=file.name.split('.').pop();
-  const path=`${currentUser.id}/fonts/${Date.now()}.${ext}`;
-  const {data,error}=await sb.storage.from('assets').upload(path,file,{upsert:true});
-  if(error){fontInfoEl.style.display='none';alert('폰트 업로드 실패: '+error.message);return;}
-  const {data:{publicUrl}}=sb.storage.from('assets').getPublicUrl(path);
-  tempFont=publicUrl;
-  tempFontName=file.name;
-  fontNameEl.textContent=file.name;
-  const style=document.createElement('style');
-  style.textContent=`@font-face{font-family:'CustomFont_preview';src:url('${publicUrl}');}`;
-  document.head.appendChild(style);
-  const sel=document.getElementById('pFont');
-  sel.innerHTML=`<option value="'CustomFont_preview',sans-serif">${file.name}</option>`+sel.innerHTML;
-  sel.value="'CustomFont_preview',sans-serif";
-  updatePreview();
-  e.target.value='';
-}
-function removeFont(){tempFont=null;tempFontName=null;document.getElementById('fontInfo').style.display='none';}
-
-function updatePreview(){
-  const textBg=document.getElementById('pTextBg').value;
-  const textBgAlpha=document.getElementById('pTextBgAlpha').value;
-  const textColor=document.getElementById('pTextColor').value;
-  const fontSize=document.getElementById('pFontSize').value;
-  const fontWeight=document.getElementById('pFontWeight').value;
-  const borderColor=document.getElementById('pBorderColor').value;
-  const borderWidth=document.getElementById('pBorderWidth').value;
-  const textAlign=document.getElementById('pTextAlign').value;
-  const paddingLeft=document.getElementById('pPaddingLeft').value;
-  document.getElementById('pTextBgAlphaVal').textContent=textBgAlpha+'%';
-  document.getElementById('pFontSizeVal').textContent=fontSize+'px';
-  document.getElementById('pPaddingLeftVal').textContent=paddingLeft+'px';
-  const bar=document.getElementById('previewBar');
-  bar.style.border=borderWidth>0?`${borderWidth}px solid ${borderColor}`:'none';
-  if(tempBgImage){bar.style.backgroundImage=`url(${tempBgImage})`;bar.style.backgroundSize='cover';bar.style.backgroundPosition='center';}
-  else bar.style.backgroundImage='none';
-  document.getElementById('previewLabelEl').style.display='none';
-  const textEl=document.getElementById('previewTextEl');
-  textEl.style.background=tempBgImage?'transparent':hexToRgba(textBg,parseInt(textBgAlpha));
-  textEl.style.color=textColor;textEl.style.fontSize='14px';textEl.style.fontWeight=fontWeight;
-  textEl.style.fontFamily=document.getElementById('pFont').value;
-  textEl.style.textAlign=textAlign;
-  textEl.style.paddingLeft=paddingLeft+'px';
-}
-
-function savePreset(){
-  const name=document.getElementById('pName').value.trim();
-  if(!name){alert('스타일 이름을 입력하세요');return;}
-  const customFontName=tempFont?tempFontName:null;
-  const p={
-    id:editingPresetId||'p_'+Date.now(),name,
-    textBg:document.getElementById('pTextBg').value,
-    textBgAlpha:parseInt(document.getElementById('pTextBgAlpha').value),
-    textColor:document.getElementById('pTextColor').value,
-    fontSize:parseInt(document.getElementById('pFontSize').value),
-    font:document.getElementById('pFont').value,
-    fontWeight:document.getElementById('pFontWeight').value,
-    textAlign:document.getElementById('pTextAlign').value,
-    paddingLeft:parseInt(document.getElementById('pPaddingLeft').value),
-    borderColor:document.getElementById('pBorderColor').value,
-    borderWidth:parseInt(document.getElementById('pBorderWidth').value),
-    width:parseInt(document.getElementById('pWidth').value)||1920,
-    height:parseInt(document.getElementById('pHeight').value)||60,
-    bgImage:tempBgImage||null,customFont:tempFont||null,customFontName
-  };
-  if(editingPresetId){const idx=state.presets.findIndex(x=>x.id===editingPresetId);if(idx>=0)state.presets[idx]=p;}
-  else state.presets.push(p);
-  closeModal();renderAll();pushState();
-}
-
-function deleteEditingPreset(){
-  if(!editingPresetId||!confirm('이 스타일을 삭제할까요?'))return;
-  state.presets=state.presets.filter(p=>p.id!==editingPresetId);
-  state.captions.forEach(c=>{if(c.styleId===editingPresetId)c.styleId=state.presets[0]?.id||'';});
-  closeModal();renderAll();pushState();
-}
-
-
+// ── 프리셋 복제 ───────────────────────────────────────────
 function duplicatePreset(id) {
-  const src = getPresetById(id);
-  if (!src) return;
+  const src = preset(id); if (!src) return;
   const copy = JSON.parse(JSON.stringify(src));
   copy.id = 'p_' + Date.now();
   copy.name = src.name + ' 사본';
@@ -784,39 +697,173 @@ function duplicatePreset(id) {
   renderAll(); pushState();
 }
 
-function exportPresets() {
-  const blob = new Blob([JSON.stringify({ presets: state.presets }, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'presets_' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
+// ── 프리셋 모달 ───────────────────────────────────────────
+function openPresetModal(id) {
+  editingPresetId = id;
+  tempBgImg = null; tempFont = null; tempFontName = null;
+  const isNew = !id;
+  document.getElementById('presetModalTitle').textContent = isNew ? '새 스타일 만들기' : '스타일 편집';
+  document.getElementById('deletePresetBtn').style.display = isNew ? 'none' : 'inline-block';
+  const p = isNew ? { name:'', textBg:'#0a0a14', bgAlpha:88, textColor:'#ffffff', fontSize:26, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'500', textAlign:'left', padLeft:24, borderColor:'#000000', borderWidth:0, width:1920, height:60, bgImg:null, customFont:null, customFontName:null } : preset(id);
+  document.getElementById('pName').value = p.name;
+  document.getElementById('pTextBg').value = p.textBg;
+  document.getElementById('pBgAlpha').value = p.bgAlpha ?? 88;
+  document.getElementById('pTextColor').value = p.textColor;
+  document.getElementById('pFontSize').value = p.fontSize;
+  document.getElementById('pFont').value = p.font;
+  document.getElementById('pFontWeight').value = p.fontWeight;
+  document.getElementById('pTextAlign').value = p.textAlign || 'left';
+  document.getElementById('pPadLeft').value = p.padLeft ?? 24;
+  document.getElementById('pBorderColor').value = p.borderColor;
+  document.getElementById('pBorderWidth').value = p.borderWidth;
+  document.getElementById('pWidth').value = p.width || 1920;
+  document.getElementById('pHeight').value = p.height || 60;
+  if (p.bgImg) { tempBgImg = p.bgImg; document.getElementById('bgImgInfo').style.display='flex'; document.getElementById('bgImgName').textContent='배경 이미지 설정됨'; }
+  else document.getElementById('bgImgInfo').style.display = 'none';
+  if (p.customFontName) { tempFont = p.customFont; tempFontName = p.customFontName; document.getElementById('fontInfo').style.display='flex'; document.getElementById('fontName').textContent=p.customFontName; }
+  else document.getElementById('fontInfo').style.display = 'none';
+  updatePreview();
+  document.getElementById('presetModal').style.display = 'flex';
 }
 
-function importPresets() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (!data.presets || !Array.isArray(data.presets)) { alert('올바른 프리셋 파일이 아닙니다.'); return; }
-        const newPresets = data.presets.map(p => ({ ...p, id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2) }));
-        state.presets = [...state.presets, ...newPresets];
-        renderAll(); pushState();
-        alert(`${newPresets.length}개 스타일을 불러왔습니다.`);
-      } catch(err) { alert('파일 형식 오류'); }
-    };
-    reader.readAsText(file);
+function closePresetModal() { document.getElementById('presetModal').style.display = 'none'; }
+
+function updatePreview() {
+  const textBg = document.getElementById('pTextBg').value;
+  const bgAlpha = parseInt(document.getElementById('pBgAlpha').value);
+  const textColor = document.getElementById('pTextColor').value;
+  const fontSize = document.getElementById('pFontSize').value;
+  const fontWeight = document.getElementById('pFontWeight').value;
+  const borderColor = document.getElementById('pBorderColor').value;
+  const borderWidth = parseInt(document.getElementById('pBorderWidth').value);
+  const textAlign = document.getElementById('pTextAlign').value;
+  const padLeft = document.getElementById('pPadLeft').value;
+  document.getElementById('pBgAlphaVal').textContent = bgAlpha + '%';
+  document.getElementById('pFontSizeVal').textContent = fontSize + 'px';
+  document.getElementById('pPadLeftVal').textContent = padLeft + 'px';
+  const bar = document.getElementById('previewBar');
+  bar.style.border = borderWidth > 0 ? `${borderWidth}px solid ${borderColor}` : 'none';
+  if (tempBgImg) { bar.style.backgroundImage=`url(${tempBgImg})`; bar.style.backgroundSize='cover'; bar.style.backgroundPosition='center'; }
+  else bar.style.backgroundImage = 'none';
+  const textEl = document.getElementById('previewText');
+  textEl.style.background = tempBgImg ? 'transparent' : hexRgba(textBg, bgAlpha);
+  textEl.style.color = textColor;
+  textEl.style.fontSize = '15px';
+  textEl.style.fontWeight = fontWeight;
+  textEl.style.fontFamily = document.getElementById('pFont').value;
+  textEl.style.textAlign = textAlign;
+  textEl.style.paddingLeft = padLeft + 'px';
+}
+
+function savePreset() {
+  const name = document.getElementById('pName').value.trim();
+  if (!name) { alert('스타일 이름을 입력하세요'); return; }
+  const p = {
+    id: editingPresetId || 'p_' + Date.now(),
+    name,
+    textBg: document.getElementById('pTextBg').value,
+    bgAlpha: parseInt(document.getElementById('pBgAlpha').value),
+    textColor: document.getElementById('pTextColor').value,
+    fontSize: parseInt(document.getElementById('pFontSize').value),
+    font: document.getElementById('pFont').value,
+    fontWeight: document.getElementById('pFontWeight').value,
+    textAlign: document.getElementById('pTextAlign').value,
+    padLeft: parseInt(document.getElementById('pPadLeft').value),
+    borderColor: document.getElementById('pBorderColor').value,
+    borderWidth: parseInt(document.getElementById('pBorderWidth').value),
+    width: parseInt(document.getElementById('pWidth').value) || 1920,
+    height: parseInt(document.getElementById('pHeight').value) || 60,
+    bgImg: tempBgImg || null,
+    customFont: tempFont || null,
+    customFontName: tempFontName || null
   };
-  input.click();
+  if (editingPresetId) {
+    const idx = state.presets.findIndex(x => x.id === editingPresetId);
+    if (idx >= 0) state.presets[idx] = p;
+  } else {
+    state.presets.push(p);
+  }
+  closePresetModal(); renderAll(); pushState();
 }
 
-document.getElementById('newCaption').addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();addCaption();}
+function deletePreset() {
+  if (!editingPresetId || !confirm('이 스타일을 삭제할까요?')) return;
+  state.presets = state.presets.filter(p => p.id !== editingPresetId);
+  state.captions.forEach(c => { if (c.styleId === editingPresetId) c.styleId = state.presets[0]?.id || ''; });
+  closePresetModal(); renderAll(); pushState();
+}
+
+// ── 파일 업로드 ───────────────────────────────────────────
+function handleBgImg(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    tempBgImg = ev.target.result;
+    document.getElementById('bgImgInfo').style.display = 'flex';
+    document.getElementById('bgImgName').textContent = file.name;
+    updatePreview();
+  };
+  reader.readAsDataURL(file); e.target.value = '';
+}
+function removeBgImg() { tempBgImg = null; document.getElementById('bgImgInfo').style.display = 'none'; updatePreview(); }
+
+async function handleFont(e) {
+  const file = e.target.files[0]; if (!file) return;
+  document.getElementById('fontName').textContent = '업로드 중...';
+  document.getElementById('fontInfo').style.display = 'flex';
+  const ext = file.name.split('.').pop();
+  const path = `${currentUser.id}/fonts/${Date.now()}.${ext}`;
+  const { error } = await SB.storage.from('assets').upload(path, file, { upsert: true });
+  if (error) { document.getElementById('fontInfo').style.display='none'; alert('폰트 업로드 실패: ' + error.message); return; }
+  const { data: { publicUrl } } = SB.storage.from('assets').getPublicUrl(path);
+  tempFont = publicUrl;
+  tempFontName = file.name;
+  document.getElementById('fontName').textContent = file.name;
+  const style = document.createElement('style');
+  style.textContent = `@font-face{font-family:'PreviewFont';src:url('${publicUrl}');}`;
+  document.head.appendChild(style);
+  const sel = document.getElementById('pFont');
+  if (!sel.querySelector('[value="\'PreviewFont\',sans-serif"]')) {
+    sel.innerHTML = `<option value="'PreviewFont',sans-serif">${file.name}</option>` + sel.innerHTML;
+  }
+  sel.value = "'PreviewFont',sans-serif";
+  updatePreview(); e.target.value = '';
+}
+function removeFont() { tempFont = null; tempFontName = null; document.getElementById('fontInfo').style.display = 'none'; }
+
+// ── 계정 모달 ─────────────────────────────────────────────
+function openAccountModal() { document.getElementById('accountModal').style.display = 'flex'; }
+function closeAccountModal() { document.getElementById('accountModal').style.display = 'none'; }
+
+async function changePw() {
+  const pw = document.getElementById('newPw').value;
+  const pw2 = document.getElementById('confirmPw').value;
+  const err = document.getElementById('pwErr');
+  const ok = document.getElementById('pwOk');
+  err.textContent = ''; ok.textContent = '';
+  if (!pw || !pw2) { err.textContent = '비밀번호를 입력해주세요.'; return; }
+  if (pw.length < 8) { err.textContent = '8자 이상 입력해주세요.'; return; }
+  if (pw !== pw2) { err.textContent = '비밀번호가 일치하지 않습니다.'; return; }
+  const { error } = await SB.auth.updateUser({ password: pw });
+  if (error) { err.textContent = '변경 실패: ' + error.message; return; }
+  ok.textContent = '비밀번호가 변경됐습니다.';
+  document.getElementById('newPw').value = '';
+  document.getElementById('confirmPw').value = '';
+}
+
+// ── URL 복사 ──────────────────────────────────────────────
+function copyUrl() {
+  const url = document.getElementById('obsUrl').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '복사됨!';
+    setTimeout(() => btn.textContent = 'URL 복사', 1500);
+  });
+}
+
+// ── 키 이벤트 ─────────────────────────────────────────────
+document.getElementById('newCaption').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addCaption(); }
 });
 
 init();
