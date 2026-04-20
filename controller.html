@@ -361,6 +361,7 @@ let state = { captions:[], active_index:-1, pos:{x:0,y:0}, anim:true, presets:[]
 let editingPresetId = null;
 let tempBgImage = null;
 let tempFont = null;
+let tempFontName = null;
 let pushing = false;
 
 function getDefaultPresets() {
@@ -609,7 +610,7 @@ function handleImport(e){
 }
 
 function openPresetModal(id){
-  editingPresetId=id;tempBgImage=null;tempFont=null;
+  editingPresetId=id;tempBgImage=null;tempFont=null;tempFontName=null;
   const isNew=!id;
   document.getElementById('modalTitle').textContent=isNew?'새 스타일 만들기':'스타일 편집';
   document.getElementById('deletePresetBtn').style.display=isNew?'none':'inline-block';
@@ -647,24 +648,30 @@ function handleBgImage(e){
 }
 function removeBgImage(){tempBgImage=null;document.getElementById('bgImageInfo').style.display='none';updatePreview();}
 
-function handleFont(e){
+async function handleFont(e){
   const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    tempFont=ev.target.result;
-    document.getElementById('fontInfo').style.display='flex';
-    document.getElementById('fontName').textContent=file.name;
-    const style=document.createElement('style');
-    style.textContent=`@font-face{font-family:'CustomFont_preview';src:url('${ev.target.result}');}`;
-    document.head.appendChild(style);
-    const sel=document.getElementById('pFont');
-    sel.innerHTML=`<option value="'CustomFont_preview',sans-serif">${file.name}</option>`+sel.innerHTML;
-    sel.value="'CustomFont_preview',sans-serif";
-    updatePreview();
-  };
-  reader.readAsDataURL(file);e.target.value='';
+  const fontInfoEl=document.getElementById('fontInfo');
+  const fontNameEl=document.getElementById('fontName');
+  fontNameEl.textContent='업로드 중...';
+  fontInfoEl.style.display='flex';
+  const ext=file.name.split('.').pop();
+  const path=`${currentUser.id}/fonts/${Date.now()}.${ext}`;
+  const {data,error}=await sb.storage.from('assets').upload(path,file,{upsert:true});
+  if(error){fontInfoEl.style.display='none';alert('폰트 업로드 실패: '+error.message);return;}
+  const {data:{publicUrl}}=sb.storage.from('assets').getPublicUrl(path);
+  tempFont=publicUrl;
+  tempFontName=file.name;
+  fontNameEl.textContent=file.name;
+  const style=document.createElement('style');
+  style.textContent=`@font-face{font-family:'CustomFont_preview';src:url('${publicUrl}');}`;
+  document.head.appendChild(style);
+  const sel=document.getElementById('pFont');
+  sel.innerHTML=`<option value="'CustomFont_preview',sans-serif">${file.name}</option>`+sel.innerHTML;
+  sel.value="'CustomFont_preview',sans-serif";
+  updatePreview();
+  e.target.value='';
 }
-function removeFont(){tempFont=null;document.getElementById('fontInfo').style.display='none';}
+function removeFont(){tempFont=null;tempFontName=null;document.getElementById('fontInfo').style.display='none';}
 
 function updatePreview(){
   const labelBg=document.getElementById('pLabelBg').value;
@@ -696,7 +703,7 @@ function updatePreview(){
 function savePreset(){
   const name=document.getElementById('pName').value.trim();
   if(!name){alert('스타일 이름을 입력하세요');return;}
-  const customFontName=tempFont?(document.getElementById('fontName').textContent||null):null;
+  const customFontName=tempFont?tempFontName:null;
   const p={
     id:editingPresetId||'p_'+Date.now(),name,
     labelText:document.getElementById('pLabelText').value||'자막',
