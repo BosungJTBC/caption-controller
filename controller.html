@@ -173,10 +173,8 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
     <div class="panel">
       <div class="panel-title">자막 목록</div>
       <div class="row-wrap">
-        <button class="btn btn-gray btn-sm" onclick="importCaptions()">불러오기 JSON</button>
-        <button class="btn btn-gray btn-sm" onclick="importXlsx()">불러오기 엑셀</button>
-        <button class="btn btn-gray btn-sm" onclick="exportCaptions()">저장 JSON</button>
-        <button class="btn btn-gray btn-sm" onclick="exportXlsx()">저장 엑셀</button>
+        <button class="btn btn-gray btn-sm" onclick="importXlsx()">불러오기</button>
+        <button class="btn btn-gray btn-sm" onclick="exportXlsx()">저장</button>
         <button class="btn btn-gray btn-sm" onclick="addDivider()">+ 구분선</button>
         <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="clearAll()">전체삭제</button>
       </div>
@@ -442,7 +440,6 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
   </div>
 </div>
 
-<input type="file" id="captionFileInput" accept=".json,.txt" style="display:none" onchange="handleCaptionImport(event)">
 <input type="file" id="presetFileInput" accept=".json" style="display:none" onchange="handlePresetImport(event)">
 <input type="file" id="xlsxFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleXlsxImport(event)">
 
@@ -523,8 +520,16 @@ async function pushState() {
   if (isPushing || !currentUser) return;
   isPushing = true;
   state.anim = document.getElementById('animToggle').checked;
+
+  // _editing 같은 임시 필드 제거 후 저장
+  const cleanCaptions = state.captions.map(c => {
+    const clean = { ...c };
+    delete clean._editing;
+    return clean;
+  });
+
   const { error } = await SB.from('caption_state').update({
-    captions: state.captions,
+    captions: cleanCaptions,
     active_index: state.active_index,
     pos: state.pos,
     anim: state.anim,
@@ -817,30 +822,6 @@ function syncPos(from) {
 }
 
 // ── 파일 내보내기/불러오기 ────────────────────────────────
-function exportCaptions() {
-  const blob = new Blob([JSON.stringify({ captions: state.captions }, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = 'captions_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
-}
-function importCaptions() { document.getElementById('captionFileInput').click(); }
-function handleCaptionImport(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      if (file.name.endsWith('.json')) {
-        const data = JSON.parse(ev.target.result);
-        if (data.captions) state.captions = [...state.captions, ...data.captions];
-      } else {
-        const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
-        const styleId = state.presets[0]?.id || 'default';
-        lines.forEach(text => state.captions.push({ text, styleId }));
-      }
-      renderAll(); pushState();
-    } catch { alert('파일 형식 오류'); }
-  };
-  reader.readAsText(file); e.target.value = '';
-}
 
 function exportXlsx() {
   // 자막 목록을 행 데이터로 변환
