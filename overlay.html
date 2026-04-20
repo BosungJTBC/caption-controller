@@ -20,7 +20,6 @@ html, body { width: 100%; height: 100%; background: transparent; overflow: hidde
 <div id="stage">
   <div id="caption-wrap">
     <div id="caption-bar">
-      <div id="label-block"></div>
       <div id="text-block"></div>
     </div>
   </div>
@@ -48,7 +47,7 @@ function loadCustomFont(preset) {
   customFontsLoaded[preset.id] = ff;
 }
 
-function applyPreset(p, bar, labelEl, textEl) {
+function applyPreset(p, bar, textEl) {
   const vw = window.innerWidth || 1920;
   const scale = vw / 1920;
   bar.style.width = ((p.width||1920)*scale)+'px';
@@ -57,12 +56,6 @@ function applyPreset(p, bar, labelEl, textEl) {
   bar.style.borderRadius = '4px';
   if (p.bgImage) { bar.style.backgroundImage=`url(${p.bgImage})`;bar.style.backgroundSize='cover';bar.style.backgroundPosition='center'; }
   else bar.style.backgroundImage='none';
-  labelEl.style.display=p.labelHide?'none':'flex';
-  labelEl.style.background=p.labelHide?'transparent':p.labelBg;
-  labelEl.style.color=p.labelColor;
-  labelEl.style.fontSize=Math.round(16*scale)+'px';
-  labelEl.style.padding=`0 ${Math.round(18*scale)}px`;
-  labelEl.textContent=p.labelText||'자막';
   loadCustomFont(p);
   const ff=customFontsLoaded[p.id]?`'${customFontsLoaded[p.id]}',${p.font}`:p.font;
   textEl.style.background=p.bgImage?'transparent':hexToRgba(p.textBg,p.textBgAlpha);
@@ -70,13 +63,14 @@ function applyPreset(p, bar, labelEl, textEl) {
   textEl.style.fontSize=Math.round(p.fontSize*scale)+'px';
   textEl.style.fontFamily=ff;
   textEl.style.fontWeight=p.fontWeight;
-  textEl.style.padding=`0 ${Math.round(24*scale)}px`;
+  textEl.style.textAlign=p.textAlign||'left';
+  textEl.style.paddingLeft=Math.round((p.paddingLeft??24)*scale)+'px';
+  textEl.style.paddingRight=Math.round(24*scale)+'px';
   textEl.style.textShadow='0 1px 4px rgba(0,0,0,0.3)';
 }
 
 function applyState(data) {
   const bar=document.getElementById('caption-bar');
-  const labelEl=document.getElementById('label-block');
   const textEl=document.getElementById('text-block');
   const wrap=document.getElementById('caption-wrap');
   const pos=data.pos||{x:0,y:0};
@@ -93,13 +87,13 @@ function applyState(data) {
       if(lastText&&data.anim!==false){
         bar.classList.remove('visible');
         setTimeout(()=>{
-          if(preset)applyPreset(preset,bar,labelEl,textEl);
+          if(preset)applyPreset(preset,bar,textEl);
           textEl.textContent=newText;
           lastText=newText;lastStyleId=newStyleId;
           bar.classList.add('visible');
         },420);
       } else {
-        if(preset)applyPreset(preset,bar,labelEl,textEl);
+        if(preset)applyPreset(preset,bar,textEl);
         textEl.textContent=newText;
         lastText=newText;lastStyleId=newStyleId;
         bar.classList.add('visible');

@@ -228,22 +228,6 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
       </div>
     </div>
     <div class="sep"></div>
-    <div style="font-size:11px;color:#e8001e;margin-bottom:10px;font-weight:500;">레이블 영역</div>
-    <div class="form-group">
-      <div class="form-label">레이블 텍스트</div>
-      <input type="text" class="form-input" id="pLabelText" placeholder="자막" oninput="updatePreview()">
-    </div>
-    <div class="color-row">
-      <span class="color-label">배경색</span>
-      <input type="color" class="form-input" id="pLabelBg" value="#333333" style="width:56px;flex:none;" oninput="updatePreview()">
-      <span class="color-label" style="margin-left:8px;">글자색</span>
-      <input type="color" class="form-input" id="pLabelColor" value="#ffffff" style="width:56px;flex:none;" oninput="updatePreview()">
-    </div>
-    <div class="toggle-row">
-      <span class="toggle-label">레이블 숨기기</span>
-      <label class="toggle"><input type="checkbox" id="pLabelHide" onchange="updatePreview()"><span class="toggle-slider"></span></label>
-    </div>
-    <div class="sep"></div>
     <div style="font-size:11px;color:#e8001e;margin-bottom:10px;font-weight:500;">텍스트 영역</div>
     <div class="color-row">
       <span class="color-label">배경색</span>
@@ -261,7 +245,7 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
     <div class="form-group">
       <div class="form-label">글자 크기 (px)</div>
       <div class="form-row">
-        <input type="range" id="pFontSize" min="12" max="64" value="26" oninput="updatePreview()">
+        <input type="range" id="pFontSize" min="12" max="150" value="26" oninput="updatePreview()">
         <span class="range-val" id="pFontSizeVal">26px</span>
       </div>
     </div>
@@ -283,6 +267,21 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
         <option value="500" selected>중간</option>
         <option value="700">굵게</option>
       </select>
+    </div>
+    <div class="form-group">
+      <div class="form-label">텍스트 정렬</div>
+      <select class="form-input" id="pTextAlign" onchange="updatePreview()">
+        <option value="left">왼쪽 정렬</option>
+        <option value="center">가운데 정렬</option>
+        <option value="right">오른쪽 정렬</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <div class="form-label">좌측 여백 (px)</div>
+      <div class="form-row">
+        <input type="range" id="pPaddingLeft" min="0" max="400" value="24" oninput="updatePreview()">
+        <span class="range-val" id="pPaddingLeftVal">24px</span>
+      </div>
     </div>
     <div class="sep"></div>
     <div style="font-size:11px;color:#e8001e;margin-bottom:10px;font-weight:500;">폰트 업로드</div>
@@ -366,9 +365,9 @@ let pushing = false;
 
 function getDefaultPresets() {
   return [
-    { id:'default', name:'기본 자막', labelText:'자막', labelBg:'#333333', labelColor:'#ffffff', labelHide:false, textBg:'#ffffff', textBgAlpha:95, textColor:'#111111', fontSize:26, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'500', borderColor:'#000000', borderWidth:1, width:1920, height:60, bgImage:null, customFont:null, customFontName:null },
-    { id:'breaking', name:'속보', labelText:'속보', labelBg:'#cc0000', labelColor:'#ffffff', labelHide:false, textBg:'#1a0000', textBgAlpha:92, textColor:'#ffffff', fontSize:26, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'700', borderColor:'#880000', borderWidth:1, width:1920, height:60, bgImage:null, customFont:null, customFontName:null },
-    { id:'interview', name:'인터뷰', labelText:'인터뷰', labelBg:'#1a4a8a', labelColor:'#ffffff', labelHide:false, textBg:'#0a1a2a', textBgAlpha:90, textColor:'#e8e8e8', fontSize:22, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'400', borderColor:'#1a4a8a', borderWidth:1, width:1920, height:60, bgImage:null, customFont:null, customFontName:null }
+    { id:'default', name:'기본 자막', textBg:'#ffffff', textBgAlpha:95, textColor:'#111111', fontSize:26, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'500', textAlign:'left', paddingLeft:24, borderColor:'#000000', borderWidth:1, width:1920, height:60, bgImage:null, customFont:null, customFontName:null },
+    { id:'breaking', name:'속보', textBg:'#1a0000', textBgAlpha:92, textColor:'#ffffff', fontSize:26, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'700', textAlign:'left', paddingLeft:24, borderColor:'#880000', borderWidth:1, width:1920, height:60, bgImage:null, customFont:null, customFontName:null },
+    { id:'interview', name:'인터뷰', textBg:'#0a1a2a', textBgAlpha:90, textColor:'#e8e8e8', fontSize:22, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'400', textAlign:'left', paddingLeft:24, borderColor:'#1a4a8a', borderWidth:1, width:1920, height:60, bgImage:null, customFont:null, customFontName:null }
   ];
 }
 
@@ -499,7 +498,7 @@ function renderList() {
       <span class="c-num">${i+1}</span>
       <div class="c-body">
         <div class="c-text">${escHtml(c.text)}</div>
-        <span class="c-style-tag" style="background:${preset.labelBg};color:${preset.labelColor};">${escHtml(preset.name)}</span>
+        <span class="c-style-tag" style="background:${hexToRgba(preset.textBg,preset.textBgAlpha)};color:${preset.textColor};">${escHtml(preset.name)}</span>
       </div>
       <div class="c-actions">
         ${isActive?'<span class="onair-badge">ON AIR</span>':''}
@@ -513,7 +512,7 @@ function renderList() {
 function renderOnAir() {
   const dot=document.getElementById('onairDot'),txt=document.getElementById('onairText');
   const idx=state.active_index;
-  if(idx>=0&&state.captions[idx]){const p=getPresetById(state.captions[idx].styleId);dot.style.background=p.labelBg;txt.className='onair-text';txt.textContent=state.captions[idx].text;}
+  if(idx>=0&&state.captions[idx]){const p=getPresetById(state.captions[idx].styleId);dot.style.background=p.textBg||'#333';txt.className='onair-text';txt.textContent=state.captions[idx].text;}
   else{dot.style.background='#333';txt.className='onair-empty';txt.textContent='자막을 선택하세요';}
 }
 
@@ -522,13 +521,12 @@ function renderPresets() {
   if(!state.presets.length){el.innerHTML='<div class="empty-state">스타일 없음</div>';return;}
   el.innerHTML=state.presets.map(p=>`
     <div class="preset-item">
-      <div class="preset-preview" style="border:${p.borderWidth}px solid ${p.borderColor};${p.bgImage?`background:url(${p.bgImage}) center/cover;`:''}">
-        ${!p.labelHide?`<div style="background:${p.labelBg};color:${p.labelColor};padding:0 5px;font-size:7px;font-weight:700;height:100%;display:flex;align-items:center;flex-shrink:0;">${escHtml(p.labelText||'')}</div>`:''}
-        <div style="background:${p.bgImage?'transparent':hexToRgba(p.textBg,p.textBgAlpha)};color:${p.textColor};font-size:7px;padding:0 4px;flex:1;display:flex;align-items:center;">Aa</div>
+      <div class="preset-preview" style="border:${p.borderWidth}px solid ${p.borderColor};${p.bgImage?`background:url(${p.bgImage}) center/cover;`:`background:${hexToRgba(p.textBg,p.textBgAlpha)};`}">
+        <div style="color:${p.textColor};font-size:8px;padding:0 6px;flex:1;display:flex;align-items:center;font-weight:${p.fontWeight};">Aa</div>
       </div>
       <div class="preset-info">
         <div class="preset-name">${escHtml(p.name)}</div>
-        <div class="preset-desc">${p.width}×${p.height}px · ${p.fontSize}px</div>
+        <div class="preset-desc">${p.width}×${p.height}px · ${p.fontSize}px · ${p.textAlign==='center'?'가운데':p.textAlign==='right'?'오른쪽':'왼쪽'}</div>
       </div>
       <div class="preset-actions"><button class="ic-btn" onclick="openPresetModal('${p.id}')">✎</button></div>
     </div>`).join('');
@@ -614,18 +612,17 @@ function openPresetModal(id){
   const isNew=!id;
   document.getElementById('modalTitle').textContent=isNew?'새 스타일 만들기':'스타일 편집';
   document.getElementById('deletePresetBtn').style.display=isNew?'none':'inline-block';
-  const p=isNew?{name:'',labelText:'자막',labelBg:'#333333',labelColor:'#ffffff',labelHide:false,textBg:'#0a0a14',textBgAlpha:88,textColor:'#ffffff',fontSize:26,font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif",fontWeight:'500',borderColor:'#000000',borderWidth:0,width:1920,height:60,bgImage:null,customFont:null,customFontName:null}:getPresetById(id);
+  const p=isNew?{name:'',textBg:'#0a0a14',textBgAlpha:88,textColor:'#ffffff',fontSize:26,font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif",fontWeight:'500',textAlign:'left',paddingLeft:24,borderColor:'#000000',borderWidth:0,width:1920,height:60,bgImage:null,customFont:null,customFontName:null}:getPresetById(id);
   document.getElementById('pName').value=p.name;
-  document.getElementById('pLabelText').value=p.labelText||'자막';
-  document.getElementById('pLabelBg').value=p.labelBg;
-  document.getElementById('pLabelColor').value=p.labelColor;
-  document.getElementById('pLabelHide').checked=!!p.labelHide;
   document.getElementById('pTextBg').value=p.textBg;
   document.getElementById('pTextBgAlpha').value=p.textBgAlpha;
   document.getElementById('pTextColor').value=p.textColor;
   document.getElementById('pFontSize').value=p.fontSize;
   document.getElementById('pFont').value=p.font;
   document.getElementById('pFontWeight').value=p.fontWeight;
+  document.getElementById('pTextAlign').value=p.textAlign||'left';
+  document.getElementById('pPaddingLeft').value=p.paddingLeft??24;
+  document.getElementById('pPaddingLeftVal').textContent=(p.paddingLeft??24)+'px';
   document.getElementById('pBorderColor').value=p.borderColor;
   document.getElementById('pBorderWidth').value=p.borderWidth;
   document.getElementById('pWidth').value=p.width||1920;
@@ -674,10 +671,6 @@ async function handleFont(e){
 function removeFont(){tempFont=null;tempFontName=null;document.getElementById('fontInfo').style.display='none';}
 
 function updatePreview(){
-  const labelBg=document.getElementById('pLabelBg').value;
-  const labelColor=document.getElementById('pLabelColor').value;
-  const labelText=document.getElementById('pLabelText').value||'자막';
-  const labelHide=document.getElementById('pLabelHide').checked;
   const textBg=document.getElementById('pTextBg').value;
   const textBgAlpha=document.getElementById('pTextBgAlpha').value;
   const textColor=document.getElementById('pTextColor').value;
@@ -685,19 +678,22 @@ function updatePreview(){
   const fontWeight=document.getElementById('pFontWeight').value;
   const borderColor=document.getElementById('pBorderColor').value;
   const borderWidth=document.getElementById('pBorderWidth').value;
+  const textAlign=document.getElementById('pTextAlign').value;
+  const paddingLeft=document.getElementById('pPaddingLeft').value;
   document.getElementById('pTextBgAlphaVal').textContent=textBgAlpha+'%';
   document.getElementById('pFontSizeVal').textContent=fontSize+'px';
+  document.getElementById('pPaddingLeftVal').textContent=paddingLeft+'px';
   const bar=document.getElementById('previewBar');
   bar.style.border=borderWidth>0?`${borderWidth}px solid ${borderColor}`:'none';
   if(tempBgImage){bar.style.backgroundImage=`url(${tempBgImage})`;bar.style.backgroundSize='cover';bar.style.backgroundPosition='center';}
   else bar.style.backgroundImage='none';
-  const labelEl=document.getElementById('previewLabelEl');
-  labelEl.style.display=labelHide?'none':'flex';
-  labelEl.style.background=labelBg;labelEl.style.color=labelColor;labelEl.textContent=labelText;
+  document.getElementById('previewLabelEl').style.display='none';
   const textEl=document.getElementById('previewTextEl');
   textEl.style.background=tempBgImage?'transparent':hexToRgba(textBg,parseInt(textBgAlpha));
   textEl.style.color=textColor;textEl.style.fontSize='14px';textEl.style.fontWeight=fontWeight;
   textEl.style.fontFamily=document.getElementById('pFont').value;
+  textEl.style.textAlign=textAlign;
+  textEl.style.paddingLeft=paddingLeft+'px';
 }
 
 function savePreset(){
@@ -706,16 +702,14 @@ function savePreset(){
   const customFontName=tempFont?tempFontName:null;
   const p={
     id:editingPresetId||'p_'+Date.now(),name,
-    labelText:document.getElementById('pLabelText').value||'자막',
-    labelBg:document.getElementById('pLabelBg').value,
-    labelColor:document.getElementById('pLabelColor').value,
-    labelHide:document.getElementById('pLabelHide').checked,
     textBg:document.getElementById('pTextBg').value,
     textBgAlpha:parseInt(document.getElementById('pTextBgAlpha').value),
     textColor:document.getElementById('pTextColor').value,
     fontSize:parseInt(document.getElementById('pFontSize').value),
     font:document.getElementById('pFont').value,
     fontWeight:document.getElementById('pFontWeight').value,
+    textAlign:document.getElementById('pTextAlign').value,
+    paddingLeft:parseInt(document.getElementById('pPaddingLeft').value),
     borderColor:document.getElementById('pBorderColor').value,
     borderWidth:parseInt(document.getElementById('pBorderWidth').value),
     width:parseInt(document.getElementById('pWidth').value)||1920,
