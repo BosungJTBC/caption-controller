@@ -93,12 +93,13 @@ textarea.fi:focus { border-color: #e8001e; }
         <tr>
           <th>이름</th>
           <th>부서</th>
-          <th>이메일</th>
-          <th>관리자</th>
+          <th>전화</th>
+          <th>상태</th>
+          <th>관리</th>
         </tr>
       </thead>
       <tbody id="userList">
-        <tr><td colspan="4" style="color:#444;text-align:center;padding:20px">불러오는 중...</td></tr>
+        <tr><td colspan="5" style="color:#444;text-align:center;padding:20px">불러오는 중...</td></tr>
       </tbody>
     </table>
   </div>
@@ -169,16 +170,36 @@ function updatePreview(content) {
 document.getElementById('noticeContent').addEventListener('input', e => updatePreview(e.target.value));
 
 async function loadUsers() {
-  const { data } = await SB.from('profiles').select('*').order('name');
+  const { data } = await SB.from('profiles').select('*').order('is_approved').order('name');
   const tbody = document.getElementById('userList');
-  if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="4" style="color:#444;text-align:center;padding:20px">사용자 없음</td></tr>'; return; }
+  if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="5" style="color:#444;text-align:center;padding:20px">사용자 없음</td></tr>'; return; }
   tbody.innerHTML = data.map(u => `
     <tr>
-      <td>${u.name || '-'}</td>
+      <td>
+        ${u.name || '-'}
+        ${u.is_admin ? '<span class="admin-badge" style="margin-left:6px">관리자</span>' : ''}
+      </td>
       <td>${u.department || '-'}</td>
-      <td style="color:#888;font-size:11px">${u.id}</td>
-      <td>${u.is_admin ? '<span class="admin-badge">관리자</span>' : '-'}</td>
+      <td style="font-size:11px;color:#888">${u.phone || '-'}</td>
+      <td>
+        ${u.is_approved
+          ? '<span style="font-size:11px;color:#88ffaa">승인됨</span>'
+          : '<span style="font-size:11px;color:#ff8888">대기 중</span>'}
+      </td>
+      <td>
+        ${u.is_approved
+          ? `<button class="btn btn-gray" style="padding:4px 10px;font-size:11px" onclick="setApproval('${u.id}', false)">승인 취소</button>`
+          : `<button class="btn btn-red" style="padding:4px 10px;font-size:11px" onclick="setApproval('${u.id}', true)">승인</button>`}
+      </td>
     </tr>`).join('');
+}
+
+async function setApproval(id, approved) {
+  const action = approved ? '승인' : '승인을 취소';
+  if (!confirm(`이 사용자의 ${action}할까요?`)) return;
+  const { error } = await SB.from('profiles').update({ is_approved: approved }).eq('id', id);
+  if (error) { alert('처리 실패: ' + error.message); return; }
+  loadUsers();
 }
 
 async function logout() { await SB.auth.signOut(); location.href = 'index.html'; }

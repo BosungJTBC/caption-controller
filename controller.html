@@ -407,6 +407,11 @@ async function init() {
   if (!session) { location.href='index.html'; return; }
   user = session.user;
   const { data: profile } = await SB.from('profiles').select('*').eq('id',user.id).single();
+  if (!profile?.is_approved) {
+    await SB.auth.signOut();
+    location.href = 'index.html';
+    return;
+  }
   document.getElementById('uname').textContent = profile?.name || user.email;
   document.getElementById('aName').textContent = profile?.name || '-';
   document.getElementById('aDept').textContent = profile?.department || '-';
