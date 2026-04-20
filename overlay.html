@@ -135,12 +135,43 @@ function applyState(data) {
   }
 }
 
+async function preloadFonts(presets) {
+  const promises = presets.filter(p => p.customFont).map(p => {
+    if (loadedFonts[p.id]) return Promise.resolve();
+    return new Promise(resolve => {
+      const ff = 'CF_' + p.id;
+      const style = document.createElement('style');
+      style.textContent = `@font-face{font-family:'${ff}';src:url('${p.customFont}');}`;
+      document.head.appendChild(style);
+      loadedFonts[p.id] = ff;
+      const testEl = document.createElement('span');
+      testEl.style.fontFamily = `'${ff}'`;
+      testEl.style.position = 'absolute';
+      testEl.style.visibility = 'hidden';
+      testEl.textContent = 'test';
+      document.body.appendChild(testEl);
+      document.fonts.load(`16px '${ff}'`).then(() => {
+        document.body.removeChild(testEl);
+        resolve();
+      }).catch(() => {
+        document.body.removeChild(testEl);
+        resolve();
+      });
+    });
+  });
+  await Promise.all(promises);
+}
+
 async function init() {
   if (!uid) return;
   const { data } = await SB.from('caption_state').select('*').eq('id', uid).single();
-  if (data) applyState(data);
+  if (data) {
+    await preloadFonts(data.presets || []);
+    applyState(data);
+  }
   SB.channel('overlay_' + uid)
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'caption_state', filter: `id=eq.${uid}` }, payload => {
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'caption_state', filter: `id=eq.${uid}` }, async payload => {
+      await preloadFonts(payload.new.presets || []);
       applyState(payload.new);
     }).subscribe();
 }
