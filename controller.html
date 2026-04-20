@@ -662,8 +662,9 @@ function handleXlsxImport(e) {
       });
       if (!newItems.length) { alert('불러올 자막이 없습니다.'); return; }
       const captionCount = newItems.filter(i => !i._divider).length;
-      if (confirm(`${captionCount}개 자막을 현재 목록에 추가할까요?\n(기존 목록은 유지됩니다)`)) {
-        S.captions = [...S.captions, ...newItems];
+      if (confirm(`⚠️ 기존 자막 목록이 모두 삭제되고 엑셀 파일의 내용으로 덮어씌워집니다.\n자막 ${captionCount}개를 불러올까요?`)) {
+        S.captions = newItems;
+        S.active_index = -1;
         renderAll(); push();
       }
     } catch(err) { console.error(err); alert('엑셀 파일 형식 오류'); }
