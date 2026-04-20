@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>자막 시스템</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Apple SD Gothic Neo', sans-serif; background: #0f0f13; color: #e8e8e8; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.card { background: #1a1a22; border: 0.5px solid #2a2a38; border-radius: 16px; padding: 40px; text-align: center; max-width: 360px; width: 100%; }
+h1 { font-size: 20px; font-weight: 500; color: #fff; margin-bottom: 8px; }
+p { font-size: 13px; color: #666; margin-bottom: 32px; line-height: 1.6; }
+.btn { display: block; width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; margin-bottom: 10px; transition: all 0.15s; text-decoration: none; text-align: center; }
+.btn-primary { background: #5566ff; color: #fff; }
+.btn-primary:hover { background: #6677ff; }
+.btn-secondary { background: #2a2a38; color: #aaa; border: 0.5px solid #3a3a4a; }
+.btn-secondary:hover { background: #33334a; color: #ddd; }
+.obs-url { background: #0a0a0e; border-radius: 8px; padding: 10px 14px; font-size: 11px; color: #88aaff; word-break: break-all; margin-top: 16px; text-align: left; line-height: 1.6; }
+.label { font-size: 11px; color: #555; margin-bottom: 6px; text-align: left; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🎬 자막 시스템</h1>
+  <p>실시간 방송 자막 컨트롤 시스템</p>
+  <a href="controller.html" class="btn btn-primary">컨트롤러 열기</a>
+  <a href="overlay.html" class="btn btn-secondary">오버레이 미리보기</a>
+  <div class="label">OBS Browser Source URL</div>
+  <div class="obs-url" id="obsUrl"></div>
+</div>
+<script>
+  const base = location.origin + location.pathname.replace('index.html','');
+  document.getElementById('obsUrl').textContent = base + 'overlay.html';
+</script>
+</body>
+</html>
