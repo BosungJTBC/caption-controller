@@ -132,7 +132,15 @@ async function signup() {
   if (pw.length < 8) { err.textContent = '비밀번호는 8자 이상이어야 합니다.'; return; }
   const { data, error } = await SB.auth.signUp({ email, password: pw, options: { data: { name, department: dept, phone } } });
   if (error) { err.textContent = error.message; return; }
-  if (data.user) await SB.from('profiles').upsert({ id: data.user.id, name, department: dept, phone });
+  if (data.user) {
+    await SB.from('profiles').upsert({
+      id: data.user.id,
+      name,
+      department: dept,
+      phone,
+      is_admin: false
+    }, { onConflict: 'id' });
+  }
   ok.textContent = '가입 완료! 이메일 인증 후 로그인해주세요.';
   setTimeout(() => showTab('login'), 2500);
 }
