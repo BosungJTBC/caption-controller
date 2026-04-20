@@ -25,8 +25,8 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
 .btn-red { background: #e8001e; color: #fff; }
 .btn-red:hover { background: #ff1a35; }
 .msg { font-size: 12px; margin-top: 10px; text-align: center; min-height: 18px; }
-.msg.error { color: #ff8888; }
-.msg.success { color: #88ff99; }
+.msg.err { color: #ff8888; }
+.msg.ok { color: #88ff99; }
 </style>
 </head>
 <body>
@@ -41,7 +41,6 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
       <button class="tab active" id="tabLogin" onclick="showTab('login')">로그인</button>
       <button class="tab" id="tabSignup" onclick="showTab('signup')">회원가입</button>
     </div>
-
     <div id="loginForm">
       <div class="form-group">
         <label class="form-label">이메일</label>
@@ -51,10 +50,9 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
         <label class="form-label">비밀번호</label>
         <input type="password" class="form-input" id="loginPw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()">
       </div>
-      <div class="msg error" id="loginMsg"></div>
+      <div class="msg err" id="loginMsg"></div>
       <button class="btn btn-red" onclick="login()">로그인</button>
     </div>
-
     <div id="signupForm" style="display:none">
       <div class="form-group">
         <label class="form-label">이메일</label>
@@ -78,8 +76,8 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
         <label class="form-label">전화번호</label>
         <input type="tel" class="form-input" id="signupPhone" placeholder="010-0000-0000" onkeydown="if(event.key==='Enter')signup()">
       </div>
-      <div class="msg error" id="signupErrMsg"></div>
-      <div class="msg success" id="signupOkMsg"></div>
+      <div class="msg err" id="signupErr"></div>
+      <div class="msg ok" id="signupOk"></div>
       <button class="btn btn-red" onclick="signup()">가입하기</button>
     </div>
   </div>
@@ -89,10 +87,7 @@ const SB = supabase.createClient(
   'https://mtkppcexpubazjeceyvj.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10a3BwY2V4cHViYXpqZWNleXZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NjA5NDIsImV4cCI6MjA5MjIzNjk0Mn0.3ruVRo3JIWUipK5-as9kTzYjRZa32K_TX1X_vSqi_v4'
 );
-
-SB.auth.getSession().then(({ data }) => {
-  if (data.session) location.href = 'controller.html';
-});
+SB.auth.getSession().then(({ data }) => { if (data.session) location.href = 'controller.html'; });
 
 function showTab(t) {
   document.getElementById('loginForm').style.display = t === 'login' ? 'block' : 'none';
@@ -100,7 +95,6 @@ function showTab(t) {
   document.getElementById('tabLogin').classList.toggle('active', t === 'login');
   document.getElementById('tabSignup').classList.toggle('active', t === 'signup');
 }
-
 async function login() {
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPw').value;
@@ -111,22 +105,21 @@ async function login() {
   if (error) { msg.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.'; return; }
   location.href = 'controller.html';
 }
-
 async function signup() {
   const email = document.getElementById('signupEmail').value.trim();
   const pw = document.getElementById('signupPw').value;
   const name = document.getElementById('signupName').value.trim();
   const dept = document.getElementById('signupDept').value.trim();
   const phone = document.getElementById('signupPhone').value.trim();
-  const errMsg = document.getElementById('signupErrMsg');
-  const okMsg = document.getElementById('signupOkMsg');
-  errMsg.textContent = ''; okMsg.textContent = '';
-  if (!email || !pw || !name || !dept) { errMsg.textContent = '모든 항목을 입력해주세요.'; return; }
-  if (pw.length < 8) { errMsg.textContent = '비밀번호는 8자 이상이어야 합니다.'; return; }
+  const err = document.getElementById('signupErr');
+  const ok = document.getElementById('signupOk');
+  err.textContent = ''; ok.textContent = '';
+  if (!email || !pw || !name || !dept) { err.textContent = '모든 항목을 입력해주세요.'; return; }
+  if (pw.length < 8) { err.textContent = '비밀번호는 8자 이상이어야 합니다.'; return; }
   const { data, error } = await SB.auth.signUp({ email, password: pw, options: { data: { name, department: dept, phone } } });
-  if (error) { errMsg.textContent = error.message; return; }
+  if (error) { err.textContent = error.message; return; }
   if (data.user) await SB.from('profiles').upsert({ id: data.user.id, name, department: dept, phone });
-  okMsg.textContent = '가입 완료! 이메일 인증 후 로그인해주세요.';
+  ok.textContent = '가입 완료! 이메일 인증 후 로그인해주세요.';
   setTimeout(() => showTab('login'), 2500);
 }
 </script>

@@ -8,21 +8,15 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; background: transparent; overflow: hidden; }
 #stage { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; align-items: flex-end; padding: 32px 40px; pointer-events: none; }
-#caption-wrap { position: relative; transition: transform 0.3s ease; }
-#caption-bar { display: flex; align-items: stretch; overflow: hidden; opacity: 0; transform: translateY(20px); transition: opacity 0.4s ease, transform 0.4s ease; }
-#caption-bar.visible { opacity: 1; transform: translateY(0); }
-#caption-bar.no-anim { transition: none !important; }
-#text-block { display: flex; align-items: center; width: 100%; }
+#wrap { position: relative; transition: transform 0.3s ease; }
+#bar { display: flex; align-items: stretch; overflow: hidden; opacity: 0; transform: translateY(20px); transition: opacity 0.4s ease, transform 0.4s ease; }
+#bar.visible { opacity: 1; transform: translateY(0); }
+#bar.no-anim { transition: none !important; }
+#txt { display: flex; align-items: center; width: 100%; }
 </style>
 </head>
 <body>
-<div id="stage">
-  <div id="caption-wrap">
-    <div id="caption-bar">
-      <div id="text-block"></div>
-    </div>
-  </div>
-</div>
+<div id="stage"><div id="wrap"><div id="bar"><div id="txt"></div></div></div></div>
 <script>
 const SB = supabase.createClient(
   'https://mtkppcexpubazjeceyvj.supabase.co',
@@ -30,152 +24,77 @@ const SB = supabase.createClient(
 );
 
 const uid = new URLSearchParams(location.search).get('uid');
-let lastText = null;
-let lastStyleId = null;
+let lastText = null, lastStyleId = null;
 let loadedFonts = {};
 
-function hexRgba(hex, a) {
-  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+function rgba(hex, a) {
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
   return `rgba(${r},${g},${b},${(a/100).toFixed(2)})`;
 }
 
-function loadFont(preset) {
-  if (!preset.customFont || loadedFonts[preset.id]) return;
-  const ff = 'CF_' + preset.id;
-  const style = document.createElement('style');
-  style.textContent = `@font-face{font-family:'${ff}';src:url('${preset.customFont}');}`;
-  document.head.appendChild(style);
-  loadedFonts[preset.id] = ff;
+async function preloadFonts(presets) {
+  const jobs = (presets||[]).filter(p=>p.customFont&&!loadedFonts[p.id]).map(p=>new Promise(res=>{
+    const ff='CF_'+p.id;
+    const s=document.createElement('style');
+    s.textContent=`@font-face{font-family:'${ff}';src:url('${p.customFont}');}`;
+    document.head.appendChild(s);
+    loadedFonts[p.id]=ff;
+    document.fonts.load(`16px '${ff}'`).then(()=>res()).catch(()=>res());
+  }));
+  await Promise.all(jobs);
 }
 
 function applyPreset(p) {
-  const bar = document.getElementById('caption-bar');
-  const textEl = document.getElementById('text-block');
-  const vw = window.innerWidth || 1920;
-  const scale = vw / 1920;
-
-  bar.style.width = ((p.width || 1920) * scale) + 'px';
-  bar.style.height = ((p.height || 60) * scale) + 'px';
-  bar.style.border = p.borderWidth > 0 ? `${p.borderWidth}px solid ${p.borderColor}` : 'none';
-  bar.style.borderRadius = '4px';
-
-  if (p.bgImg) {
-    bar.style.backgroundImage = `url(${p.bgImg})`;
-    bar.style.backgroundSize = 'cover';
-    bar.style.backgroundPosition = 'center';
-    textEl.style.background = 'transparent';
-  } else {
-    bar.style.backgroundImage = 'none';
-    textEl.style.background = hexRgba(p.textBg, p.bgAlpha ?? p.textBgAlpha ?? 88);
-  }
-
-  loadFont(p);
-  const ff = loadedFonts[p.id] ? `'${loadedFonts[p.id]}',${p.font}` : p.font;
-
-  textEl.style.color = p.textColor;
-  textEl.style.fontSize = Math.round(p.fontSize * scale) + 'px';
-  textEl.style.fontFamily = ff;
-  textEl.style.fontWeight = p.fontWeight;
-  textEl.style.textAlign = p.textAlign || 'left';
-  textEl.style.paddingLeft = Math.round((p.padLeft ?? p.paddingLeft ?? 24) * scale) + 'px';
-  textEl.style.paddingRight = Math.round(24 * scale) + 'px';
-
-  if (p.shadowOn) {
-    const r = parseInt(p.shadowColor.slice(1,3),16), g = parseInt(p.shadowColor.slice(3,5),16), b = parseInt(p.shadowColor.slice(5,7),16);
-    const sa = ((p.shadowAlpha ?? 50) / 100).toFixed(2);
-    textEl.style.textShadow = `${p.shadowX ?? 0}px ${p.shadowY ?? 2}px ${p.shadowBlur ?? 4}px rgba(${r},${g},${b},${sa})`;
-  } else {
-    textEl.style.textShadow = 'none';
-  }
-  textEl.style.width = '100%';
+  const bar=document.getElementById('bar'), txt=document.getElementById('txt');
+  const vw=window.innerWidth||1920, scale=vw/1920;
+  bar.style.width=((p.width||1920)*scale)+'px';
+  bar.style.height=((p.height||60)*scale)+'px';
+  bar.style.border=p.borderWidth>0?`${p.borderWidth}px solid ${p.borderColor}`:'none';
+  bar.style.borderRadius='4px';
+  if(p.bgImg){bar.style.backgroundImage=`url(${p.bgImg})`;bar.style.backgroundSize='cover';bar.style.backgroundPosition='center';txt.style.background='transparent';}
+  else{bar.style.backgroundImage='none';txt.style.background=rgba(p.textBg,p.bgAlpha??p.textBgAlpha??88);}
+  const ff=loadedFonts[p.id]?`'${loadedFonts[p.id]}',${p.font}`:p.font;
+  txt.style.color=p.textColor;
+  txt.style.fontSize=Math.round(p.fontSize*scale)+'px';
+  txt.style.fontFamily=ff;
+  txt.style.fontWeight=p.fontWeight;
+  txt.style.textAlign=p.align||p.textAlign||'left';
+  txt.style.paddingLeft=Math.round((p.padLeft??p.paddingLeft??24)*scale)+'px';
+  txt.style.paddingRight=Math.round(24*scale)+'px';
+  txt.style.width='100%';
+  if(p.shadowOn){
+    const sc=rgba(p.shadowColor||'#000000',p.shadowAlpha??50);
+    txt.style.textShadow=`${p.shadowX??0}px ${p.shadowY??2}px ${p.shadowBlur??4}px ${sc}`;
+  } else txt.style.textShadow='none';
 }
 
-function applyState(data) {
-  const bar = document.getElementById('caption-bar');
-  const textEl = document.getElementById('text-block');
-  const wrap = document.getElementById('caption-wrap');
-
-  const pos = data.pos || { x: 0, y: 0 };
-  wrap.style.transform = `translate(${pos.x || 0}px, ${pos.y || 0}px)`;
-
-  if (data.anim !== false) bar.classList.remove('no-anim');
-  else bar.classList.add('no-anim');
-
-  const idx = data.active_index;
-  const captions = data.captions || [];
-  const cap = (idx >= 0 && captions[idx]) ? captions[idx] : null;
-  const newText = cap ? cap.text : null;
-  const newStyleId = cap ? cap.styleId : null;
-
-  if (newText === lastText && newStyleId === lastStyleId) return;
-
-  if (newText && cap) {
-    const presets = data.presets || [];
-    const p = presets.find(x => x.id === cap.styleId) || presets[0];
-    if (lastText && data.anim !== false) {
+function apply(data) {
+  const bar=document.getElementById('bar'), txt=document.getElementById('txt'), wrap=document.getElementById('wrap');
+  const pos=data.pos||{x:0,y:0};
+  wrap.style.transform=`translate(${pos.x||0}px,${pos.y||0}px)`;
+  data.anim!==false?bar.classList.remove('no-anim'):bar.classList.add('no-anim');
+  const idx=data.active_index, caps=data.captions||[];
+  const cap=(idx>=0&&caps[idx]&&!caps[idx]._divider)?caps[idx]:null;
+  const newText=cap?cap.text:null, newStyleId=cap?cap.styleId:null;
+  if(newText===lastText&&newStyleId===lastStyleId) return;
+  if(newText&&cap){
+    const p=(data.presets||[]).find(x=>x.id===cap.styleId)||(data.presets||[])[0];
+    if(lastText&&data.anim!==false){
       bar.classList.remove('visible');
-      setTimeout(() => {
-        if (p) applyPreset(p);
-        textEl.textContent = newText;
-        lastText = newText;
-        lastStyleId = newStyleId;
-        bar.classList.add('visible');
-      }, 420);
-    } else {
-      if (p) applyPreset(p);
-      textEl.textContent = newText;
-      lastText = newText;
-      lastStyleId = newStyleId;
-      bar.classList.add('visible');
-    }
-  } else {
-    bar.classList.remove('visible');
-    lastText = newText;
-    lastStyleId = newStyleId;
-  }
-}
-
-async function preloadFonts(presets) {
-  const promises = presets.filter(p => p.customFont).map(p => {
-    if (loadedFonts[p.id]) return Promise.resolve();
-    return new Promise(resolve => {
-      const ff = 'CF_' + p.id;
-      const style = document.createElement('style');
-      style.textContent = `@font-face{font-family:'${ff}';src:url('${p.customFont}');}`;
-      document.head.appendChild(style);
-      loadedFonts[p.id] = ff;
-      const testEl = document.createElement('span');
-      testEl.style.fontFamily = `'${ff}'`;
-      testEl.style.position = 'absolute';
-      testEl.style.visibility = 'hidden';
-      testEl.textContent = 'test';
-      document.body.appendChild(testEl);
-      document.fonts.load(`16px '${ff}'`).then(() => {
-        document.body.removeChild(testEl);
-        resolve();
-      }).catch(() => {
-        document.body.removeChild(testEl);
-        resolve();
-      });
-    });
-  });
-  await Promise.all(promises);
+      setTimeout(()=>{ if(p)applyPreset(p); txt.textContent=newText; lastText=newText; lastStyleId=newStyleId; bar.classList.add('visible'); },420);
+    } else { if(p)applyPreset(p); txt.textContent=newText; lastText=newText; lastStyleId=newStyleId; bar.classList.add('visible'); }
+  } else { bar.classList.remove('visible'); lastText=newText; lastStyleId=newStyleId; }
 }
 
 async function init() {
-  if (!uid) return;
-  const { data } = await SB.from('caption_state').select('*').eq('id', uid).single();
-  if (data) {
-    await preloadFonts(data.presets || []);
-    applyState(data);
-  }
-  SB.channel('overlay_' + uid)
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'caption_state', filter: `id=eq.${uid}` }, async payload => {
-      await preloadFonts(payload.new.presets || []);
-      applyState(payload.new);
+  if(!uid) return;
+  const {data}=await SB.from('caption_state').select('*').eq('id',uid).single();
+  if(data){ await preloadFonts(data.presets); apply(data); }
+  SB.channel('ov_'+uid)
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'caption_state',filter:`id=eq.${uid}`},async p=>{
+      await preloadFonts(p.new.presets); apply(p.new);
     }).subscribe();
 }
-
 init();
 </script>
 </body>
