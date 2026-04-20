@@ -504,7 +504,7 @@ function renderList() {
     if (c._divider) {
       if (c._editing) return `
         <div class="sec-div" data-i="${i}">
-          <span class="dh">⠿</span>
+          ${activeFilter===null?'<span class="dh">⠿</span>':''}
           <div class="dline"></div>
           <input class="dlabel-input" id="dInput_${i}" value="${esc(c._dividerLabel)}" placeholder="섹션 이름" onkeydown="divKey(event,${i})">
           <button class="ic ok" onclick="saveDiv(${i})">✓</button>
@@ -513,7 +513,7 @@ function renderList() {
         </div>`;
       return `
         <div class="sec-div" data-i="${i}">
-          <span class="dh">⠿</span>
+          ${activeFilter===null?'<span class="dh">⠿</span>':''}
           <div class="dline"></div>
           <span class="dlabel">${esc(c._dividerLabel||'섹션')}</span>
           <div class="dline"></div>
@@ -526,7 +526,7 @@ function renderList() {
     const isActive = i === S.active_index;
     if (c._editing) return `
       <div class="cap-item editing" data-i="${i}">
-        <span class="dh">⠿</span>
+        ${activeFilter===null?'<span class="dh">⠿</span>':''}
         <span class="cnum">${capNum}</span>
         <div class="cbody">
           <textarea class="edit-ta" id="eTa_${i}" onkeydown="editKey(event,${i})">${esc(c.text)}</textarea>
@@ -539,7 +539,7 @@ function renderList() {
       </div>`;
     return `
       <div class="cap-item${isActive?' active':''}" data-i="${i}" onclick="selectCap(${i})">
-        <span class="dh">⠿</span>
+        ${activeFilter===null?'<span class="dh">⠿</span>':''}
         <span class="cnum">${capNum}</span>
         <div class="cbody">
           <div class="ctext">${esc(c.text)}</div>
@@ -677,6 +677,7 @@ function handleXlsxImport(e) {
 function initSort() {
   const el = document.getElementById('capList');
   if (sortable) sortable.destroy();
+  if (activeFilter !== null) return; // 필터 상태에서는 드래그 비활성화
   sortable = Sortable.create(el, {
     handle: '.dh',
     animation: 150,
