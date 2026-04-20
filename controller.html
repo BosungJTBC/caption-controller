@@ -148,7 +148,7 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
 <div class="topbar">
   <span class="brand">JTBC</span>
   <span class="topbar-title"><span class="live-dot"></span> 디지털 라이브 자막</span>
-  <div class="topbar-right">
+  <div class="topbar-right" id="topbarRight">
     <div class="status-pill"><span class="sdot" id="sdot"></span><span id="stxt">연결 중...</span></div>
     <span class="uname" id="uname"></span>
     <button class="ghost" onclick="openAccount()">계정</button>
@@ -413,6 +413,14 @@ async function init() {
   document.getElementById('aPhone').textContent = p?.phone||'-';
   document.getElementById('aEmail').textContent = user.email;
   document.getElementById('obsUrl').textContent = `${location.origin}/overlay.html?uid=${user.id}`;
+  if (profile?.is_admin) {
+    const adminBtn = document.createElement('a');
+    adminBtn.href = 'admin.html';
+    adminBtn.className = 'ghost';
+    adminBtn.textContent = '관리자';
+    adminBtn.style.color = '#e8001e';
+    document.getElementById('topbarRight').insertBefore(adminBtn, document.getElementById('topbarRight').firstChild);
+  }
   await loadState();
   subscribe();
 }

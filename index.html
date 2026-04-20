@@ -27,6 +27,9 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
 .msg { font-size: 12px; margin-top: 10px; text-align: center; min-height: 18px; }
 .msg.err { color: #ff8888; }
 .msg.ok { color: #88ff99; }
+.notice-box { background: #1a1210; border: 0.5px solid #e8001e44; border-left: 3px solid #e8001e; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; }
+.notice-title { font-size: 11px; font-weight: 700; color: #e8001e; letter-spacing: 0.08em; margin-bottom: 6px; }
+.notice-text { font-size: 13px; color: #ccc; line-height: 1.6; white-space: pre-wrap; }
 </style>
 </head>
 <body>
@@ -36,6 +39,7 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
     <h1>디지털 라이브 자막</h1>
     <p>Digital Live Caption System</p>
   </div>
+  <div id="noticeArea"></div>
   <div class="card">
     <div class="tabs">
       <button class="tab active" id="tabLogin" onclick="showTab('login')">로그인</button>
@@ -88,6 +92,16 @@ const SB = supabase.createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10a3BwY2V4cHViYXpqZWNleXZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NjA5NDIsImV4cCI6MjA5MjIzNjk0Mn0.3ruVRo3JIWUipK5-as9kTzYjRZa32K_TX1X_vSqi_v4'
 );
 SB.auth.getSession().then(({ data }) => { if (data.session) location.href = 'controller.html'; });
+
+// 공지 불러오기
+SB.from('notices').select('*').eq('is_active', true).limit(1).single().then(({ data }) => {
+  if (!data || !data.content) return;
+  document.getElementById('noticeArea').innerHTML = `
+    <div class="notice-box">
+      <div class="notice-title">📢 공지사항</div>
+      <div class="notice-text">${data.content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+    </div>`;
+});
 
 function showTab(t) {
   document.getElementById('loginForm').style.display = t === 'login' ? 'block' : 'none';
