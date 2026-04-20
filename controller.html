@@ -5,6 +5,7 @@
 <title>JTBC 디지털 라이브 자막</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Apple SD Gothic Neo','Malgun Gothic',sans-serif; background: #0f0f13; color: #e8e8e8; min-height: 100vh; display: flex; flex-direction: column; }
@@ -160,6 +161,8 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
     <div class="panel">
       <div class="ptitle">자막 목록</div>
       <div class="rwrap">
+        <button class="btn btn-gray btn-sm" onclick="importXlsx()">불러오기</button>
+        <button class="btn btn-gray btn-sm" onclick="exportXlsx()">저장</button>
         <button class="btn btn-gray btn-sm" onclick="addDivider()">+ 구분선</button>
         <button class="btn btn-del btn-sm" style="margin-left:auto" onclick="clearAll()">전체삭제</button>
       </div>
@@ -363,6 +366,7 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
 </div>
 
 <input type="file" id="presetFileIn" accept=".json" style="display:none" onchange="handlePresetImport(event)">
+<input type="file" id="xlsxFileIn" accept=".xlsx,.xls" style="display:none" onchange="handleXlsxImport(event)">
 
 <script>
 const SB = supabase.createClient(
@@ -379,12 +383,10 @@ let pushing = false;
 let sortable = null;
 let activeFilter = null;
 
-// ── 기본 프리셋 ──────────────────────────────────────────
+// ── 기본 프리셋 (DB에 아무것도 없을 때만 사용) ──────────
 function defPresets() {
   return [
-    { id:'default',   name:'기본 자막', textBg:'#ffffff', bgAlpha:95,  textColor:'#111111', fontSize:26, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'500', align:'left', padLeft:24, borderColor:'#000000', borderWidth:1, width:1920, height:60, bgImg:null, customFont:null, customFontName:null, shadowOn:false, shadowColor:'#000000', shadowAlpha:50, shadowX:0, shadowY:2, shadowBlur:4 },
-    { id:'breaking',  name:'속보',     textBg:'#1a0000', bgAlpha:92,  textColor:'#ffffff', fontSize:26, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'700', align:'left', padLeft:24, borderColor:'#880000', borderWidth:1, width:1920, height:60, bgImg:null, customFont:null, customFontName:null, shadowOn:false, shadowColor:'#000000', shadowAlpha:50, shadowX:0, shadowY:2, shadowBlur:4 },
-    { id:'interview', name:'인터뷰',   textBg:'#0a1a2a', bgAlpha:90,  textColor:'#e8e8e8', fontSize:22, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'400', align:'left', padLeft:24, borderColor:'#1a4a8a', borderWidth:1, width:1920, height:60, bgImg:null, customFont:null, customFontName:null, shadowOn:false, shadowColor:'#000000', shadowAlpha:50, shadowX:0, shadowY:2, shadowBlur:4 }
+    { id:'default', name:'기본 자막', textBg:'#ffffff', bgAlpha:95, textColor:'#111111', fontSize:26, font:"'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif", fontWeight:'500', align:'left', padLeft:24, borderColor:'#000000', borderWidth:1, width:1920, height:60, bgImg:null, customFont:null, customFontName:null, shadowOn:false, shadowColor:'#000000', shadowAlpha:50, shadowX:0, shadowY:2, shadowBlur:4 }
   ];
 }
 
@@ -610,6 +612,65 @@ function renderFilter() {
 }
 
 function setFilter(v) { activeFilter=v; renderList(); renderFilter(); }
+
+// ── 엑셀 내보내기/불러오기 ───────────────────────────────
+function exportXlsx() {
+  if (!S.captions.length) { alert('내보낼 자막이 없습니다.'); return; }
+  const rows = [];
+  let currentSection = '';
+  S.captions.forEach(c => {
+    if (c._divider) {
+      currentSection = c._dividerLabel || '';
+    } else {
+      const p = getPreset(c.styleId);
+      rows.push({ '구분': currentSection, '자막 내용': c.text, '스타일': p ? p.name : '' });
+    }
+  });
+  if (!rows.length) { alert('내보낼 자막이 없습니다.'); return; }
+  const ws = XLSX.utils.json_to_sheet(rows, { header: ['구분', '자막 내용', '스타일'] });
+  ws['!cols'] = [{ wch: 16 }, { wch: 60 }, { wch: 16 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '자막 목록');
+  XLSX.writeFile(wb, 'captions_' + new Date().toISOString().slice(0,10) + '.xlsx');
+}
+
+function importXlsx() { document.getElementById('xlsxFileIn').click(); }
+
+function handleXlsxImport(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const wb = XLSX.read(ev.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      let lastSection = null;
+      const newItems = [];
+      rows.forEach(row => {
+        const section = String(row['구분'] || '').trim();
+        const text = String(row['자막 내용'] || '').trim();
+        const styleName = String(row['스타일'] || '').trim();
+        if (!text) return;
+        // 섹션이 바뀌면 구분선 추가
+        if (section !== lastSection) {
+          if (section) newItems.push({ _divider: true, _dividerLabel: section });
+          lastSection = section;
+        }
+        // 스타일 이름으로 프리셋 찾기 (없으면 첫번째)
+        const p = S.presets.find(p => p.name === styleName) || S.presets[0];
+        newItems.push({ text, styleId: p?.id || '' });
+      });
+      if (!newItems.length) { alert('불러올 자막이 없습니다.'); return; }
+      const captionCount = newItems.filter(i => !i._divider).length;
+      if (confirm(`${captionCount}개 자막을 현재 목록에 추가할까요?\n(기존 목록은 유지됩니다)`)) {
+        S.captions = [...S.captions, ...newItems];
+        renderAll(); push();
+      }
+    } catch(err) { console.error(err); alert('엑셀 파일 형식 오류'); }
+  };
+  reader.readAsBinaryString(file);
+  e.target.value = '';
+}
 
 // ── SortableJS ───────────────────────────────────────────
 function initSort() {
