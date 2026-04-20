@@ -5,6 +5,7 @@
 <title>JTBC 디지털 라이브 자막 - 컨트롤러</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #0f0f13; color: #e8e8e8; min-height: 100vh; display: flex; flex-direction: column; }
@@ -172,8 +173,10 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
     <div class="panel">
       <div class="panel-title">자막 목록</div>
       <div class="row-wrap">
-        <button class="btn btn-gray btn-sm" onclick="importCaptions()">불러오기</button>
-        <button class="btn btn-gray btn-sm" onclick="exportCaptions()">저장</button>
+        <button class="btn btn-gray btn-sm" onclick="importCaptions()">불러오기 JSON</button>
+        <button class="btn btn-gray btn-sm" onclick="importXlsx()">불러오기 엑셀</button>
+        <button class="btn btn-gray btn-sm" onclick="exportCaptions()">저장 JSON</button>
+        <button class="btn btn-gray btn-sm" onclick="exportXlsx()">저장 엑셀</button>
         <button class="btn btn-gray btn-sm" onclick="addDivider()">+ 구분선</button>
         <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="clearAll()">전체삭제</button>
       </div>
@@ -441,6 +444,7 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
 
 <input type="file" id="captionFileInput" accept=".json,.txt" style="display:none" onchange="handleCaptionImport(event)">
 <input type="file" id="presetFileInput" accept=".json" style="display:none" onchange="handlePresetImport(event)">
+<input type="file" id="xlsxFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleXlsxImport(event)">
 
 <script>
 // ── Supabase ──────────────────────────────────────────────
@@ -838,7 +842,71 @@ function handleCaptionImport(e) {
   reader.readAsText(file); e.target.value = '';
 }
 
-function exportPresets() {
+function exportXlsx() {
+  // 자막 목록을 행 데이터로 변환
+  const rows = [];
+  let currentSection = '';
+  state.captions.forEach(c => {
+    if (c._divider) {
+      currentSection = c._dividerLabel || '';
+    } else {
+      const p = preset(c.styleId);
+      rows.push({ '구분': currentSection, '자막 내용': c.text, '스타일': p ? p.name : '' });
+    }
+  });
+
+  if (!rows.length) { alert('내보낼 자막이 없습니다.'); return; }
+
+  const ws = XLSX.utils.json_to_sheet(rows, { header: ['구분', '자막 내용', '스타일'] });
+
+  // 컬럼 너비 설정
+  ws['!cols'] = [{ wch: 16 }, { wch: 60 }, { wch: 16 }];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '자막 목록');
+  XLSX.writeFile(wb, 'captions_' + new Date().toISOString().slice(0,10) + '.xlsx');
+}
+
+function importXlsx() { document.getElementById('xlsxFileInput').click(); }
+
+function handleXlsxImport(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const wb = XLSX.read(ev.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+      let lastSection = null;
+      const newItems = [];
+
+      rows.forEach(row => {
+        const section = String(row['구분'] || '').trim();
+        const text = String(row['자막 내용'] || '').trim();
+        const styleName = String(row['스타일'] || '').trim();
+        if (!text) return;
+
+        // 섹션이 바뀌면 구분선 추가
+        if (section && section !== lastSection) {
+          newItems.push({ _divider: true, _dividerLabel: section });
+          lastSection = section;
+        }
+
+        // 스타일 이름으로 프리셋 찾기 (없으면 첫 번째)
+        const p = state.presets.find(p => p.name === styleName) || state.presets[0];
+        newItems.push({ text, styleId: p?.id || '' });
+      });
+
+      if (!newItems.length) { alert('불러올 자막이 없습니다.'); return; }
+      state.captions = [...state.captions, ...newItems];
+      renderAll(); pushState();
+      alert(`${newItems.filter(i => !i._divider).length}개 자막을 불러왔습니다.`);
+    } catch(err) { console.error(err); alert('엑셀 파일 형식 오류'); }
+  };
+  reader.readAsBinaryString(file);
+  e.target.value = '';
+}
   const blob = new Blob([JSON.stringify({ presets: state.presets }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = 'presets_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
