@@ -95,15 +95,19 @@ function applyState(data) {
         setTimeout(()=>{
           if(preset)applyPreset(preset,bar,labelEl,textEl);
           textEl.textContent=newText;
+          lastText=newText;lastStyleId=newStyleId;
           bar.classList.add('visible');
         },420);
       } else {
         if(preset)applyPreset(preset,bar,labelEl,textEl);
         textEl.textContent=newText;
+        lastText=newText;lastStyleId=newStyleId;
         bar.classList.add('visible');
       }
-    } else bar.classList.remove('visible');
-    lastText=newText;lastStyleId=newStyleId;
+    } else {
+      bar.classList.remove('visible');
+      lastText=newText;lastStyleId=newStyleId;
+    }
   }
 }
 
