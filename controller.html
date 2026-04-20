@@ -66,7 +66,19 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
 .edit-ta { width: 100%; background: #1a1a35; border: 0.5px solid #5566ff; border-radius: 6px; color: #fff; padding: 6px 8px; font-size: 13px; font-family: inherit; resize: none; min-height: 48px; outline: none; line-height: 1.5; }
 .edit-sel { margin-top: 6px; width: 100%; background: #12121a; border: 0.5px solid #3a3a5a; border-radius: 6px; color: #ccc; padding: 5px 8px; font-size: 12px; font-family: inherit; outline: none; }
 
-/* 자막 추가 영역 */
+/* 섹션 구분선 */
+.section-divider { display: flex; align-items: center; gap: 8px; padding: 6px 4px; cursor: default; user-select: none; }
+.section-divider .drag-handle { color: #333; }
+.section-divider .drag-handle:hover { color: #666; }
+.divider-line { flex: 1; height: 0.5px; background: #3a3a5a; }
+.divider-label { font-size: 11px; font-weight: 500; color: #5566ff; letter-spacing: 0.06em; white-space: nowrap; padding: 0 4px; }
+.divider-label-input { background: none; border: none; border-bottom: 0.5px solid #5566ff; color: #5566ff; font-size: 11px; font-weight: 500; font-family: inherit; outline: none; width: 120px; padding: 1px 2px; letter-spacing: 0.06em; }
+
+/* 섹션 필터 탭 */
+.filter-bar { padding: 10px 12px; border-bottom: 0.5px solid #2a2a38; display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; background: #0f0f13; }
+.filter-tab { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 0.5px solid #2a2a38; background: none; color: #666; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+.filter-tab:hover { border-color: #3a3a5a; color: #aaa; }
+.filter-tab.active { background: #5566ff22; border-color: #5566ff55; color: #8899ff; }
 .add-area { padding: 12px 14px; background: #12121a; border-top: 0.5px solid #2a2a38; flex-shrink: 0; }
 .add-ta { width: 100%; background: #1a1a22; border: 0.5px solid #2a2a38; border-radius: 8px; color: #e8e8e8; padding: 9px 12px; font-size: 13px; font-family: inherit; resize: none; min-height: 52px; outline: none; transition: border-color 0.15s; line-height: 1.5; }
 .add-ta:focus { border-color: #e8001e; }
@@ -159,9 +171,11 @@ code { display: block; background: #0a0a0e; border-radius: 6px; padding: 8px 12p
       <div class="row-wrap">
         <button class="btn btn-gray btn-sm" onclick="importCaptions()">불러오기</button>
         <button class="btn btn-gray btn-sm" onclick="exportCaptions()">저장</button>
+        <button class="btn btn-gray btn-sm" onclick="addDivider()">+ 구분선</button>
         <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="clearAll()">전체삭제</button>
       </div>
     </div>
+    <div class="filter-bar" id="filterBar"></div>
     <div class="caption-list" id="captionList"></div>
     <div class="add-area">
       <textarea class="add-ta" id="newCaption" placeholder="새 자막 입력 (Enter 추가 / Shift+Enter 줄바꿈)"></textarea>
@@ -536,18 +550,67 @@ function renderAll() {
   renderPresets();
   renderPosUI();
   renderStyleSel();
+  renderFilterBar();
 }
 
 function renderList() {
   const el = document.getElementById('captionList');
   if (!state.captions.length) { el.innerHTML = '<div class="empty-state">자막 목록이 비어있습니다</div>'; return; }
-  el.innerHTML = state.captions.map((c, i) => {
+
+  // 필터링: activeFilter가 있으면 해당 섹션 이후 ~ 다음 섹션 전까지만 표시
+  let visibleIndices = [];
+  if (activeFilter === null) {
+    visibleIndices = state.captions.map((_, i) => i);
+  } else {
+    let inSection = false;
+    for (let i = 0; i < state.captions.length; i++) {
+      const c = state.captions[i];
+      if (c._divider) {
+        if (inSection) break; // 다음 섹션 시작 → 중단
+        if (c._dividerLabel === activeFilter) inSection = true;
+        visibleIndices.push(i); // 섹션 구분선 자체도 포함
+      } else if (inSection) {
+        visibleIndices.push(i);
+      }
+    }
+  }
+
+  if (!visibleIndices.length) { el.innerHTML = '<div class="empty-state">이 섹션에 자막이 없습니다</div>'; return; }
+
+  let capNum = 0;
+  el.innerHTML = visibleIndices.map(i => {
+    const c = state.captions[i];
+
+    // 구분선
+    if (c._divider) {
+      if (c._editing) return `
+        <div class="section-divider" data-i="${i}">
+          <span class="drag-handle" draggable="true" onmousedown="event.stopPropagation()" ondragstart="dragStart(event,${i})" ondragend="dragEnd(event)">⠿</span>
+          <div class="divider-line"></div>
+          <input class="divider-label-input" id="divEditInput_${i}" value="${esc(c._dividerLabel||'')}" placeholder="섹션 이름" onkeydown="divEditKey(event,${i})" onfocus="event.stopPropagation()">
+          <button class="ic-btn confirm" onclick="saveDividerEdit(${i})">✓</button>
+          <button class="ic-btn" onclick="cancelEdit(${i})">✕</button>
+          <div class="divider-line"></div>
+        </div>`;
+      return `
+        <div class="section-divider" data-i="${i}">
+          <span class="drag-handle" draggable="true" onmousedown="event.stopPropagation()" ondragstart="dragStart(event,${i})" ondragend="dragEnd(event)">⠿</span>
+          <div class="divider-line"></div>
+          <span class="divider-label">${esc(c._dividerLabel || '섹션')}</span>
+          <div class="divider-line"></div>
+          <button class="ic-btn" onclick="event.stopPropagation();startDividerEdit(${i})" title="편집">✎</button>
+          <button class="ic-btn danger" onclick="event.stopPropagation();deleteCaption(${i})" title="삭제">✕</button>
+        </div>`;
+    }
+
+    // 일반 자막
+    capNum++;
     const p = preset(c.styleId);
     const isActive = i === state.active_index;
     if (c._editing) return `
       <div class="cap-item editing" data-i="${i}">
         <span class="drag-handle">⠿</span>
-        <span class="cap-num">${i+1}</span>
+        <span class="cap-num">${capNum}</span>
         <div class="cap-body">
           <textarea class="edit-ta" id="editTa_${i}" onkeydown="editKey(event,${i})">${esc(c.text)}</textarea>
           <select class="edit-sel" id="editSel_${i}">
@@ -560,9 +623,9 @@ function renderList() {
         </div>
       </div>`;
     return `
-      <div class="cap-item${isActive?' active':''}" data-i="${i}" draggable="false" onclick="selectCaption(${i})">
+      <div class="cap-item${isActive?' active':''}" data-i="${i}" onclick="selectCaption(${i})">
         <span class="drag-handle" draggable="true" onmousedown="event.stopPropagation()" ondragstart="dragStart(event,${i})" ondragend="dragEnd(event)">⠿</span>
-        <span class="cap-num">${i+1}</span>
+        <span class="cap-num">${capNum}</span>
         <div class="cap-body">
           <div class="cap-text">${esc(c.text)}</div>
           <span class="cap-tag" style="background:${hexRgba(p.textBg,p.bgAlpha)};color:${p.textColor}">${esc(p.name)}</span>
@@ -574,8 +637,10 @@ function renderList() {
         </div>
       </div>`;
   }).join('');
+
   state.captions.forEach((c, i) => {
-    if (c._editing) setTimeout(() => { const t = document.getElementById('editTa_'+i); if(t){t.focus();t.selectionStart=t.value.length;} }, 30);
+    if (c._editing && !c._divider) setTimeout(() => { const t = document.getElementById('editTa_'+i); if(t){t.focus();t.selectionStart=t.value.length;} }, 30);
+    if (c._editing && c._divider) setTimeout(() => { const t = document.getElementById('divEditInput_'+i); if(t){t.focus();t.select();} }, 30);
   });
 }
 
@@ -626,11 +691,67 @@ function renderStyleSel() {
   document.getElementById('addStyleSel').innerHTML = state.presets.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
 }
 
+function renderFilterBar() {
+  const dividers = state.captions.filter(c => c._divider && c._dividerLabel);
+  const bar = document.getElementById('filterBar');
+  if (!dividers.length) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  bar.innerHTML = `
+    <button class="filter-tab${activeFilter===null?' active':''}" onclick="setFilter(null)">전체</button>
+    ${dividers.map(c => `<button class="filter-tab${activeFilter===c._dividerLabel?' active':''}" onclick="setFilter('${esc(c._dividerLabel)}')">${esc(c._dividerLabel)}</button>`).join('')}
+  `;
+}
+
+function setFilter(label) {
+  activeFilter = label;
+  renderList();
+  renderFilterBar();
+}
+
+// ── 구분선 ────────────────────────────────────────────────
+function addDivider() {
+  state.captions.forEach(c => delete c._editing);
+  state.captions.push({ _divider: true, _dividerLabel: '새 섹션', _editing: true });
+  renderAll(); pushState();
+}
+
+function startDividerEdit(i) {
+  state.captions.forEach(c => delete c._editing);
+  state.captions[i]._editing = true;
+  renderList();
+}
+
+function saveDividerEdit(i) {
+  const input = document.getElementById('divEditInput_' + i);
+  if (input) state.captions[i]._dividerLabel = input.value.trim() || '섹션';
+  delete state.captions[i]._editing;
+  renderAll(); pushState();
+}
+
+function divEditKey(e, i) {
+  if (e.key === 'Enter') { e.preventDefault(); saveDividerEdit(i); }
+  if (e.key === 'Escape') cancelEdit(i);
+}
+
 // ── 자막 조작 ─────────────────────────────────────────────
 function selectCaption(i) { state.active_index = i; renderAll(); pushState(); }
 function hideCaption() { state.active_index = -1; renderAll(); pushState(); }
-function prevCaption() { if (!state.captions.length) return; state.active_index = state.active_index <= 0 ? state.captions.length-1 : state.active_index-1; renderAll(); pushState(); }
-function nextCaption() { if (!state.captions.length) return; state.active_index = state.active_index >= state.captions.length-1 ? 0 : state.active_index+1; renderAll(); pushState(); }
+function prevCaption() {
+  if (!state.captions.length) return;
+  let i = state.active_index - 1;
+  while (i >= 0 && state.captions[i]._divider) i--;
+  if (i < 0) { i = state.captions.length - 1; while (i > 0 && state.captions[i]._divider) i--; }
+  state.active_index = i;
+  renderAll(); pushState();
+}
+function nextCaption() {
+  if (!state.captions.length) return;
+  let i = state.active_index + 1;
+  while (i < state.captions.length && state.captions[i]._divider) i++;
+  if (i >= state.captions.length) { i = 0; while (i < state.captions.length - 1 && state.captions[i]._divider) i++; }
+  state.active_index = i;
+  renderAll(); pushState();
+}
 
 function addCaption() {
   const ta = document.getElementById('newCaption');
@@ -942,6 +1063,7 @@ function copyUrl() {
 // ── 키 이벤트 ─────────────────────────────────────────────
 // ── 드래그앤드롭 ──────────────────────────────────────────
 let dragSrcIndex = null;
+let activeFilter = null; // null = 전체보기
 
 function dragStart(e, i) {
   dragSrcIndex = i;
