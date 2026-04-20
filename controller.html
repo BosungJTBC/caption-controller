@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>JTBC 디지털 라이브 자막 - 컨트롤러</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #0f0f13; color: #e8e8e8; min-height: 100vh; display: flex; flex-direction: column; }
@@ -51,8 +52,10 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
 .drag-handle { color: #333; cursor: grab; font-size: 14px; padding: 2px 4px; flex-shrink: 0; user-select: none; line-height: 1.5; transition: color 0.15s; }
 .drag-handle:hover { color: #888; }
 .drag-handle:active { cursor: grabbing; }
-.cap-item.dragging { opacity: 0.4; border-color: #5566ff; }
-.cap-item.drag-over { border-color: #e8001e; background: #1f0f12; }
+.cap-item.sortable-ghost { opacity: 0.3; background: #1a1a35; border-color: #5566ff; }
+.cap-item.sortable-chosen { background: #1a1a28; border-color: #3a3a5a; }
+.section-divider.sortable-ghost { opacity: 0.3; }
+.section-divider.sortable-chosen { opacity: 0.7; }
 .cap-item:hover { border-color: #3a3a5a; background: #1a1a28; }
 .cap-item.active { border-color: #e8001e; background: #1f0f12; }
 .cap-item.editing { border-color: #5566ff88; cursor: default; }
@@ -585,7 +588,7 @@ function renderList() {
     if (c._divider) {
       if (c._editing) return `
         <div class="section-divider" data-i="${i}">
-          <span class="drag-handle" draggable="true" onmousedown="event.stopPropagation()" ondragstart="dragStart(event,${i})" ondragend="dragEnd(event)">⠿</span>
+          <span class="drag-handle">⠿</span>
           <div class="divider-line"></div>
           <input class="divider-label-input" id="divEditInput_${i}" value="${esc(c._dividerLabel||'')}" placeholder="섹션 이름" onkeydown="divEditKey(event,${i})" onfocus="event.stopPropagation()">
           <button class="ic-btn confirm" onclick="saveDividerEdit(${i})">✓</button>
@@ -594,7 +597,7 @@ function renderList() {
         </div>`;
       return `
         <div class="section-divider" data-i="${i}">
-          <span class="drag-handle" draggable="true" onmousedown="event.stopPropagation()" ondragstart="dragStart(event,${i})" ondragend="dragEnd(event)">⠿</span>
+          <span class="drag-handle">⠿</span>
           <div class="divider-line"></div>
           <span class="divider-label">${esc(c._dividerLabel || '섹션')}</span>
           <div class="divider-line"></div>
@@ -624,7 +627,7 @@ function renderList() {
       </div>`;
     return `
       <div class="cap-item${isActive?' active':''}" data-i="${i}" onclick="selectCaption(${i})">
-        <span class="drag-handle" draggable="true" onmousedown="event.stopPropagation()" ondragstart="dragStart(event,${i})" ondragend="dragEnd(event)">⠿</span>
+        <span class="drag-handle">⠿</span>
         <span class="cap-num">${capNum}</span>
         <div class="cap-body">
           <div class="cap-text">${esc(c.text)}</div>
@@ -642,6 +645,9 @@ function renderList() {
     if (c._editing && !c._divider) setTimeout(() => { const t = document.getElementById('editTa_'+i); if(t){t.focus();t.selectionStart=t.value.length;} }, 30);
     if (c._editing && c._divider) setTimeout(() => { const t = document.getElementById('divEditInput_'+i); if(t){t.focus();t.select();} }, 30);
   });
+
+  // SortableJS 재초기화 (렌더 후 DOM 재생성됐으므로)
+  setTimeout(() => initSortable(), 0);
 }
 
 function renderOnAir() {
@@ -1060,48 +1066,27 @@ function copyUrl() {
   });
 }
 
-// ── 키 이벤트 ─────────────────────────────────────────────
-// ── 드래그앤드롭 ──────────────────────────────────────────
-let dragSrcIndex = null;
-let activeFilter = null; // null = 전체보기
+// ── SortableJS 드래그앤드롭 ───────────────────────────────
+let activeFilter = null;
+let sortable = null;
 
-function dragStart(e, i) {
-  dragSrcIndex = i;
-  e.dataTransfer.effectAllowed = 'move';
-  setTimeout(() => {
-    const el = document.querySelector(`.cap-item[data-i="${i}"]`);
-    if (el) el.classList.add('dragging');
-  }, 0);
-}
-
-function dragEnd(e) {
-  document.querySelectorAll('.cap-item').forEach(el => {
-    el.classList.remove('dragging', 'drag-over');
-  });
-  dragSrcIndex = null;
-}
-
-function setupDragDrop() {
-  const list = document.getElementById('captionList');
-  list.addEventListener('dragover', e => {
-    e.preventDefault();
-    const target = e.target.closest('.cap-item[data-i]');
-    if (!target) return;
-    document.querySelectorAll('.cap-item').forEach(el => el.classList.remove('drag-over'));
-    target.classList.add('drag-over');
-  });
-  list.addEventListener('drop', e => {
-    e.preventDefault();
-    const target = e.target.closest('.cap-item[data-i]');
-    if (!target || dragSrcIndex === null) return;
-    const destIndex = parseInt(target.dataset.i);
-    if (dragSrcIndex === destIndex) return;
-    const moved = state.captions.splice(dragSrcIndex, 1)[0];
-    state.captions.splice(destIndex, 0, moved);
-    if (state.active_index === dragSrcIndex) state.active_index = destIndex;
-    else if (state.active_index > dragSrcIndex && state.active_index <= destIndex) state.active_index--;
-    else if (state.active_index < dragSrcIndex && state.active_index >= destIndex) state.active_index++;
-    renderAll(); pushState();
+function initSortable() {
+  const el = document.getElementById('captionList');
+  if (sortable) sortable.destroy();
+  sortable = Sortable.create(el, {
+    handle: '.drag-handle',
+    animation: 150,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+    onEnd() {
+      const items = el.querySelectorAll('[data-i]');
+      const newCaptions = [...items].map(el => state.captions[parseInt(el.dataset.i)]);
+      const activeItem = state.active_index >= 0 ? state.captions[state.active_index] : null;
+      state.captions = newCaptions;
+      state.active_index = activeItem ? state.captions.indexOf(activeItem) : -1;
+      renderAll();
+      pushState();
+    }
   });
 }
 
@@ -1109,7 +1094,7 @@ document.getElementById('newCaption').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addCaption(); }
 });
 
-setupDragDrop();
+initSortable();
 init();
 </script>
 </body>
