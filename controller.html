@@ -779,7 +779,7 @@ function savePreset() {
     bgAlpha:parseInt(document.getElementById('pBgAlpha').value),
     textColor:document.getElementById('pTextColor').value,
     fontSize:parseInt(document.getElementById('pFontSize').value),
-    font:document.getElementById('pFont').value,
+    font:document.getElementById('pFont').value || "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif",
     fontWeight:document.getElementById('pFontWeight').value,
     align:document.getElementById('pAlign').value,
     padLeft:parseInt(document.getElementById('pPadLeft').value),

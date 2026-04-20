@@ -53,7 +53,8 @@ function applyPreset(p) {
   bar.style.borderRadius='4px';
   if(p.bgImg){bar.style.backgroundImage=`url(${p.bgImg})`;bar.style.backgroundSize='cover';bar.style.backgroundPosition='center';txt.style.background='transparent';}
   else{bar.style.backgroundImage='none';txt.style.background=rgba(p.textBg,p.bgAlpha??p.textBgAlpha??88);}
-  const ff=loadedFonts[p.id]?`'${loadedFonts[p.id]}',${p.font}`:p.font;
+  const baseFontFamily = p.font || "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif";
+  const ff = loadedFonts[p.id] ? `'${loadedFonts[p.id]}',${baseFontFamily}` : baseFontFamily;
   txt.style.color=p.textColor;
   txt.style.fontSize=Math.round(p.fontSize*scale)+'px';
   txt.style.fontFamily=ff;
