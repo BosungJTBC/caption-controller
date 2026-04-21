@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>JTBC 디지털 라이브 자막</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -511,7 +511,7 @@ function renderList() {
     }
   }
 
-  if (!items.length) { el.innerHTML = '<div class="empty">'+(S.captions.length?'이 섹션에 자막이 없습니다':'자막 목록이 비어있습니다')+'</div>'; setTimeout(()=>initSort(),0); return; }
+  if (!items.length) { el.innerHTML = '<div class="empty">'+(S.captions.length?'이 섹션에 자막이 없습니다':'자막 목록이 비어있습니다')+'</div>'; requestAnimationFrame(()=>initSort()); return; }
 
   let capNum = 0;
   el.innerHTML = items.map(i => {
@@ -573,7 +573,7 @@ function renderList() {
     if (c._divider) setTimeout(()=>{ const t=document.getElementById('dInput_'+i); if(t){t.focus();t.select();} },30);
     else setTimeout(()=>{ const t=document.getElementById('eTa_'+i); if(t){t.focus();t.selectionStart=t.value.length;} },30);
   });
-  setTimeout(()=>initSort(),0);
+  requestAnimationFrame(()=>initSort());
 }
 
 function renderOnAir() {
@@ -691,8 +691,9 @@ function handleXlsxImport(e) {
 // ── SortableJS ───────────────────────────────────────────
 function initSort() {
   const el = document.getElementById('capList');
-  if (sortable) sortable.destroy();
-  if (activeFilter !== null) return; // 필터 상태에서는 드래그 비활성화
+  if (!el) return;
+  if (sortable) { try { sortable.destroy(); } catch(e) {} sortable = null; }
+  if (activeFilter !== null) return;
   sortable = Sortable.create(el, {
     handle: '.dh',
     animation: 150,
