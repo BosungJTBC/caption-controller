@@ -626,7 +626,12 @@ function renderFilter() {
     +divs.map(c=>`<button class="ftab${activeFilter===c._dividerLabel?' active':''}" onclick="setFilter('${esc(c._dividerLabel)}')">${esc(c._dividerLabel)}</button>`).join('');
 }
 
-function setFilter(v) { activeFilter=v; renderList(); renderFilter(); }
+function setFilter(v) {
+  activeFilter = v;
+  if (sortable) { try { sortable.destroy(); } catch(e) {} sortable = null; }
+  renderList();
+  renderFilter();
+}
 
 // ── 엑셀 내보내기/불러오기 ───────────────────────────────
 function exportXlsx() {
