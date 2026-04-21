@@ -6,13 +6,58 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #0a0a0f; color: #e8e8e8; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-.wrap { width: 100%; max-width: 420px; padding: 24px; }
+body {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  color: #e8e8e8;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #12121f;
+  overflow: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg at 40% 50%,
+    #12121f 0%,
+    #2a0a10 20%,
+    #12121f 35%,
+    #151228 50%,
+    #12121f 65%,
+    #2a0a10 80%,
+    #12121f 100%
+  );
+  animation: gradSpin 12s linear infinite;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 60% 40%, #e8001e22 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 70%, #5566ff18 0%, transparent 50%);
+  animation: gradPulse 6s ease-in-out infinite alternate;
+  z-index: 0;
+}
+@keyframes gradSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes gradPulse {
+  from { opacity: 0.6; }
+  to   { opacity: 1; }
+}
+.wrap { width: 100%; max-width: 420px; padding: 24px; position: relative; z-index: 1; }
 .logo { text-align: center; margin-bottom: 36px; }
 .logo .brand { font-size: 13px; font-weight: 700; color: #e8001e; letter-spacing: 0.15em; margin-bottom: 8px; }
 .logo h1 { font-size: 22px; font-weight: 500; color: #fff; }
 .logo p { font-size: 12px; color: #555; margin-top: 6px; }
-.card { background: #1a1a22; border: 0.5px solid #2a2a38; border-radius: 16px; padding: 32px; }
+.card { background: #1a1a22cc; backdrop-filter: blur(12px); border: 0.5px solid #2a2a38; border-radius: 16px; padding: 32px; }
 .tabs { display: flex; background: #12121a; border-radius: 8px; padding: 3px; margin-bottom: 28px; }
 .tab { flex: 1; padding: 8px; text-align: center; font-size: 13px; color: #666; cursor: pointer; border-radius: 6px; border: none; background: none; font-family: inherit; transition: all 0.15s; }
 .tab.active { background: #2a2a3a; color: #fff; }
@@ -27,7 +72,7 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
 .msg { font-size: 12px; margin-top: 10px; text-align: center; min-height: 18px; }
 .msg.err { color: #ff8888; }
 .msg.ok { color: #88ff99; }
-.notice-box { background: #1a1210; border: 0.5px solid #e8001e44; border-left: 3px solid #e8001e; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; }
+.notice-box { background: #1a121099; border: 0.5px solid #e8001e44; border-left: 3px solid #e8001e; border-radius: 8px; padding: 12px 16px; margin-top: 16px; }
 .notice-title { font-size: 11px; font-weight: 700; color: #e8001e; letter-spacing: 0.08em; margin-bottom: 6px; }
 .notice-text { font-size: 13px; color: #ccc; line-height: 1.6; white-space: pre-wrap; }
 </style>
